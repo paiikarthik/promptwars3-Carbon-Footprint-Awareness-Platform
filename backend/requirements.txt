@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+google-generativeai
+firebase-admin
+scikit-learn
+pandas
+numpy
+python-dotenv
+pytest
+httpx
+jinja2
+python-multipart
+

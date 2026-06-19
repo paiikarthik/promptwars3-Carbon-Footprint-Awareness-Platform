@@ -1,0 +1,100 @@
+{
+  "users": {
+    "docId (userId)": {
+      "displayName": "string",
+      "email": "string",
+      "createdAt": "timestamp",
+      "location_enabled": "boolean",
+      "preferences": {
+        "commute_mode": "string (petrol_bike|diesel_car|ev|public_transit|walk_cycle)",
+        "diet_preference": "string (meat_heavy|balanced|vegetarian|vegan)",
+        "home_energy_source": "string (coal_grid|mixed_grid|solar)",
+        "points": "integer",
+        "xp": "integer",
+        "level": "integer",
+        "streak": "integer",
+        "last_active_date": "string (YYYY-MM-DD)"
+      },
+      "badges": [
+        {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "awardedAt": "timestamp"
+        }
+      ]
+    }
+  },
+  "carbon_logs": {
+    "docId (logId)": {
+      "userId": "string",
+      "date": "string (YYYY-MM-DD)",
+      "category_breakdown": {
+        "transportation": "float (kg CO2)",
+        "energy": "float (kg CO2)",
+        "food": "float (kg CO2)",
+        "lifestyle": "float (kg CO2)"
+      },
+      "inputs": {
+        "commute_distance_km": "float",
+        "commute_mode": "string",
+        "electricity_kwh": "float",
+        "meals": {
+          "meat_heavy": "integer",
+          "vegetarian": "integer",
+          "vegan": "integer"
+        },
+        "shopping_purchases": "integer",
+        "waste_recycled": "boolean"
+      },
+      "total_emissions": "float (kg CO2)",
+      "carbon_score": "integer (0-100)"
+    }
+  },
+  "community_challenges": {
+    "docId (challengeId)": {
+      "title": "string",
+      "description": "string",
+      "target_saving_kg": "float",
+      "points_reward": "integer",
+      "category": "string (transport|energy|food|lifestyle)",
+      "scope": "string (global|city|college|workplace)",
+      "scope_name": "string (e.g. City of Seattle, Campus A)",
+      "participants": ["string (userId)"],
+      "completed_by": ["string (userId)"],
+      "start_date": "timestamp",
+      "end_date": "timestamp"
+    }
+  },
+  "leaderboard": {
+    "docId (userId)": {
+      "displayName": "string",
+      "scope": "string",
+      "scope_name": "string",
+      "total_carbon_saved": "float (kg CO2)",
+      "rank": "integer",
+      "last_updated": "timestamp"
+    }
+  },
+  "eco_twin": {
+    "docId (userId)": {
+      "current_status": {
+        "transportation_impact": "string (low|medium|high)",
+        "energy_impact": "string (low|medium|high)",
+        "food_impact": "string (low|medium|high)",
+        "lifestyle_impact": "string (low|medium|high)",
+        "overall_health_score": "integer (0-100)"
+      },
+      "roadmap": [
+        {
+          "week": "integer",
+          "milestone": "string",
+          "action": "string",
+          "target_saving": "float (kg CO2)",
+          "completed": "boolean",
+          "completedAt": "timestamp"
+        }
+      ]
+    }
+  }
+}
