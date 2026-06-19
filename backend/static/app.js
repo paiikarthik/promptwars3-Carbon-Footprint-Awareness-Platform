@@ -20,6 +20,17 @@ let selectedDiet = 'balanced';
 window.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   loadUserSession();
+  
+  // Accessibility: Keyboard Escape key listener to close dialogues
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeLogModal();
+      const drawer = document.getElementById('buddy-drawer');
+      if (drawer && !drawer.classList.contains('translate-x-full')) {
+        drawer.classList.add('translate-x-full');
+      }
+    }
+  });
 });
 
 async function loadUserSession() {
@@ -46,8 +57,6 @@ async function loadUserSession() {
       selectedCommuteMode = userState.preferences.commute_mode || 'petrol_bike';
       selectedEnergySource = userState.preferences.home_energy_source || 'mixed_grid';
       selectedDiet = userState.preferences.diet_preference || 'balanced';
-      document.getElementById('input-distance').value = userState.preferences.commute_distance_km || 15;
-      document.getElementById('slider-distance-num').innerText = userState.preferences.commute_distance_km || 15;
     }
 
     // Fetch carbon logs
@@ -117,12 +126,12 @@ function switchTab(tabId) {
   
   // Update sidebar buttons style
   document.querySelectorAll('aside nav button').forEach(btn => {
-    btn.className = "w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white";
+    btn.className = "w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green";
   });
   
   const activeBtn = document.getElementById(`nav-${tabId}`);
   if (activeBtn) {
-    activeBtn.className = "w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition bg-eco-accent-green/10 border border-eco-accent-green/25 text-eco-accent-mint";
+    activeBtn.className = "w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition bg-eco-accent-green/10 border border-eco-accent-green/25 text-eco-accent-mint focus:outline-none";
   }
 
   // Adjust View titles
@@ -325,16 +334,16 @@ function renderEcoTwin() {
     roadmapHtml += `
       <div class="flex items-start space-x-4 p-3.5 rounded-xl border transition ${milestone.completed ? 'border-eco-accent-green/20 bg-eco-accent-green/5' : 'border-white/5 bg-white/5'}">
         <div class="mt-0.5 p-1.5 rounded-lg ${milestone.completed ? 'bg-eco-accent-green/20 text-eco-accent-mint' : 'bg-white/5 text-slate-400'}">
-          <i data-lucide="${milestone.completed ? 'shield-check' : 'flame'}" class="w-4 h-4"></i>
+          <i data-lucide="${milestone.completed ? 'shield-check' : 'flame'}" class="w-4 h-4" aria-hidden="true"></i>
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex justify-between items-center">
             <span class="text-xs font-semibold text-eco-accent-cyan">Week ${milestone.week} - ${milestone.milestone}</span>
-            ${milestone.completed ? '<span class="text-xxs font-bold text-eco-accent-mint uppercase tracking-wider">Completed</span>' : `<button onclick="completeRoadmapMilestone(${idx})" class="text-xxs font-bold text-eco-accent-cyan hover:underline uppercase tracking-wider">Complete</button>`}
+            ${milestone.completed ? '<span class="text-xxs font-bold text-eco-accent-mint uppercase tracking-wider">Completed</span>' : `<button onclick="completeRoadmapMilestone(${idx})" class="text-xxs font-bold text-eco-accent-cyan hover:underline uppercase tracking-wider focus:outline-none">Complete</button>`}
           </div>
           <p class="text-sm font-medium text-slate-200 mt-0.5">${milestone.action}</p>
           <div class="flex items-center space-x-2 mt-1">
-            <i data-lucide="leaf" class="w-3.5 h-3.5 text-eco-accent-green"></i>
+            <i data-lucide="leaf" class="w-3.5 h-3.5 text-eco-accent-green" aria-hidden="true"></i>
             <span class="text-xs text-slate-400">Target Savings: <strong class="text-slate-300 font-semibold">${milestone.target_saving} kg CO2</strong></span>
           </div>
         </div>
@@ -393,18 +402,18 @@ async function completeRoadmapMilestone(index) {
 function toggleMapLayer(layer) {
   activeMapLayer = layer;
   document.querySelectorAll('[id^="layer-btn-"]').forEach(btn => {
-    btn.className = "py-2 px-2 text-xs rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400";
+    btn.className = "py-2 px-2 text-xs rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400 focus:outline-none";
   });
-  document.getElementById(`layer-btn-${layer}`).className = "py-2 px-2 text-xs rounded-lg border font-medium transition border-eco-accent-green bg-eco-accent-green/20 text-white";
+  document.getElementById(`layer-btn-${layer}`).className = "py-2 px-2 text-xs rounded-lg border font-medium transition border-eco-accent-green bg-eco-accent-green/20 text-white focus:outline-none";
   renderCityMap();
 }
 
 function changePoiType(type) {
   activePoiType = type;
   document.querySelectorAll('[id^="poi-btn-"]').forEach(btn => {
-    btn.className = "py-2 px-3 text-xs rounded-lg border font-medium transition flex items-center space-x-1.5 border-white/5 bg-white/5 text-slate-400";
+    btn.className = "py-2 px-3 text-xs rounded-lg border font-medium transition flex items-center space-x-1.5 border-white/5 bg-white/5 text-slate-400 focus:outline-none";
   });
-  document.getElementById(`poi-btn-${type}`).className = "py-2 px-3 text-xs rounded-lg border font-medium transition flex items-center space-x-1.5 border-white/20 bg-white/15 text-white";
+  document.getElementById(`poi-btn-${type}`).className = "py-2 px-3 text-xs rounded-lg border font-medium transition flex items-center space-x-1.5 border-white/20 bg-white/15 text-white focus:outline-none";
   renderCityMap();
 }
 
@@ -517,9 +526,9 @@ async function runRouteAnalysis(event) {
 function filterChallenges(scope) {
   activeChallengesFilter = scope;
   document.querySelectorAll('[id^="chal-filter-"]').forEach(btn => {
-    btn.className = "py-1.5 px-3 text-xxs rounded-lg border transition border-white/5 bg-white/5 text-slate-400";
+    btn.className = "py-1.5 px-3 text-xxs rounded-lg border transition border-white/5 bg-white/5 text-slate-400 focus:outline-none";
   });
-  document.getElementById(`chal-filter-${scope}`).className = "py-1.5 px-3 text-xxs rounded-lg border transition border-eco-accent-green bg-eco-accent-green/20 text-white font-bold";
+  document.getElementById(`chal-filter-${scope}`).className = "py-1.5 px-3 text-xxs rounded-lg border transition border-eco-accent-green bg-eco-accent-green/20 text-white font-bold focus:outline-none";
   renderChallenges();
 }
 
@@ -549,10 +558,10 @@ async function renderChallenges() {
 
       listHtml += `
         <div class="glass-card rounded-2xl p-5 border-white/10 flex flex-col justify-between relative overflow-hidden transition-all ${isCompleted ? 'border-eco-accent-green/25 bg-eco-accent-green/5' : ''}">
-          <div class="absolute -top-4 -right-4 w-12 h-12 bg-white/5 rotate-45 border-l border-b border-white/5"></div>
+          <div class="absolute -top-4 -right-4 w-12 h-12 bg-white/5 rotate-45 border-l border-b border-white/5" aria-hidden="true"></div>
           <div>
             <div class="flex items-center space-x-2 text-slate-400 text-xxs uppercase tracking-wider font-bold">
-              <i data-lucide="${icon}" class="w-3.5 h-3.5"></i>
+              <i data-lucide="${icon}" class="w-3.5 h-3.5" aria-hidden="true"></i>
               <span>${c.scope_name}</span>
             </div>
             <h4 class="text-md font-bold text-white mt-1 font-display">${c.title}</h4>
@@ -561,24 +570,24 @@ async function renderChallenges() {
           <div class="mt-4 pt-4 border-t border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex items-center space-x-4 text-xxs text-slate-400">
               <span class="flex items-center text-eco-accent-mint font-semibold">
-                <i data-lucide="leaf" class="w-3.5 h-3.5 mr-1 text-eco-accent-green"></i>
+                <i data-lucide="leaf" class="w-3.5 h-3.5 mr-1 text-eco-accent-green" aria-hidden="true"></i>
                 Saves ${c.target_saving_kg} kg CO2
               </span>
               <span class="flex items-center text-eco-accent-yellow font-bold">
-                <i data-lucide="award" class="w-3.5 h-3.5 mr-0.5 text-eco-accent-yellow"></i>
+                <i data-lucide="award" class="w-3.5 h-3.5 mr-0.5 text-eco-accent-yellow" aria-hidden="true"></i>
                 +${c.points_reward} Points
               </span>
             </div>
             
             ${isCompleted ? `
-              <div class="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-eco-accent-green/20 text-eco-accent-mint border border-eco-accent-green/30 text-xs font-bold uppercase">
-                <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <div class="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-eco-accent-green/20 text-eco-accent-mint border border-eco-accent-green/30 text-xs font-bold uppercase" aria-label="Challenge Completed badge">
+                <i data-lucide="check-circle" class="w-4 h-4" aria-hidden="true"></i>
                 <span>Completed</span>
               </div>
             ` : isJoined ? `
-              <button onclick="completeChallenge('${c.id}')" class="px-4 py-1.5 bg-eco-accent-green hover:bg-emerald-600 text-slate-900 font-extrabold text-xs rounded-lg transition">Complete Sprint</button>
+              <button onclick="completeChallenge('${c.id}')" class="px-4 py-1.5 bg-eco-accent-green hover:bg-emerald-600 text-slate-900 font-extrabold text-xs rounded-lg transition focus:outline-none">Complete Sprint</button>
             ` : `
-              <button onclick="joinChallenge('${c.id}')" class="px-4 py-1.5 bg-white/10 hover:bg-white/15 border border-white/10 text-white font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+              <button onclick="joinChallenge('${c.id}')" class="px-4 py-1.5 bg-white/10 hover:bg-white/15 border border-white/10 text-white font-semibold text-xs rounded-lg transition flex items-center space-x-1 focus:outline-none">
                 <span>Join Challenge</span>
               </button>
             `}
@@ -619,7 +628,7 @@ async function renderChallenges() {
         trophyHtml += `
           <div class="flex items-center space-x-2 bg-white/5 border border-white/5 rounded-xl p-2 hover:border-eco-accent-yellow/20 transition duration-300">
             <div class="p-1.5 rounded-lg bg-eco-accent-yellow/15 text-eco-accent-yellow">
-              <i data-lucide="award" class="w-5 h-5"></i>
+              <i data-lucide="award" class="w-5 h-5" aria-hidden="true"></i>
             </div>
             <div>
               <span class="text-xxs font-bold text-white block">${b.name}</span>
@@ -672,6 +681,30 @@ async function completeChallenge(id) {
 function openLogModal() {
   document.getElementById('log-modal').classList.remove('hidden');
   setLogStep(1);
+
+  // Smart Flow: Pre-fill sliders with the user's historical averages
+  if (userState && userState.historical_averages) {
+    const avgDist = userState.historical_averages.commute_distance_km;
+    const avgElec = userState.historical_averages.electricity_kwh;
+    
+    // Set distance
+    const distInput = document.getElementById('input-distance');
+    if (distInput) {
+      distInput.value = avgDist;
+      document.getElementById('slider-distance-num').innerText = avgDist;
+    }
+    // Set electricity
+    const elecInput = document.getElementById('input-electricity');
+    if (elecInput) {
+      elecInput.value = avgElec;
+      document.getElementById('slider-electricity-num').innerText = avgElec;
+    }
+  }
+
+  // Pre-select buttons inside log modal
+  selectCommuteMode(selectedCommuteMode);
+  selectEnergySource(selectedEnergySource);
+  selectDiet(selectedDiet);
 }
 
 function closeLogModal() {
@@ -688,9 +721,9 @@ function setLogStep(step) {
 function selectCommuteMode(mode) {
   selectedCommuteMode = mode;
   document.querySelectorAll('.commute-mode-btn').forEach(btn => {
-    btn.className = "commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400";
+    btn.className = "commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400 focus:outline-none";
   });
-  document.getElementById(`mode-btn-${mode}`).className = "commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-eco-accent-green bg-eco-accent-green/20 text-white";
+  document.getElementById(`mode-btn-${mode}`).className = "commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-eco-accent-green bg-eco-accent-green/20 text-white focus:outline-none";
   
   const distanceSection = document.getElementById('commute-distance-section');
   if (mode === 'walk_cycle') {
@@ -703,17 +736,17 @@ function selectCommuteMode(mode) {
 function selectEnergySource(source) {
   selectedEnergySource = source;
   document.querySelectorAll('.energy-source-btn').forEach(btn => {
-    btn.className = "energy-source-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400";
+    btn.className = "energy-source-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400 focus:outline-none";
   });
-  document.getElementById(`source-btn-${source}`).className = "energy-source-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-eco-accent-cyan bg-eco-accent-cyan/20 text-white";
+  document.getElementById(`source-btn-${source}`).className = "energy-source-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-eco-accent-cyan bg-eco-accent-cyan/20 text-white focus:outline-none";
 }
 
 function selectDiet(diet) {
   selectedDiet = diet;
   document.querySelectorAll('.diet-btn').forEach(btn => {
-    btn.className = "diet-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400";
+    btn.className = "diet-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400 focus:outline-none";
   });
-  document.getElementById(`diet-btn-${diet}`).className = "diet-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-amber-400 bg-amber-400/20 text-white";
+  document.getElementById(`diet-btn-${diet}`).className = "diet-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-amber-400 bg-amber-400/20 text-white focus:outline-none";
 }
 
 function updateDistanceSliderVal(val) {
@@ -795,7 +828,7 @@ function renderBuddyChat() {
     chatHtml += `
       <div class="flex items-start space-x-3 max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse space-x-reverse' : ''}">
         <div class="p-2 rounded-lg flex-shrink-0 ${isMe ? 'bg-eco-accent-cyan/20 text-eco-accent-cyan' : 'bg-eco-accent-green/20 text-eco-accent-mint'}">
-          <i data-lucide="${isMe ? 'user' : 'message-square'}" class="w-4 h-4"></i>
+          <i data-lucide="${isMe ? 'user' : 'message-square'}" class="w-4 h-4" aria-hidden="true"></i>
         </div>
         <div class="p-3.5 rounded-2xl border text-slate-200 ${isMe ? 'bg-eco-bg-input border-eco-accent-cyan/20 rounded-tr-none' : 'bg-white/5 border-white/15 rounded-tl-none'}">
           ${isMe ? `<p class="text-sm font-medium">${msg.content}</p>` : parseMarkdown(msg.content)}
@@ -822,7 +855,7 @@ async function sendBuddyQuery(query) {
   historyContainer.innerHTML += `
     <div id="${typingId}" class="flex items-start space-x-3 max-w-[80%]">
       <div class="p-2 bg-eco-accent-green/20 text-eco-accent-mint rounded-lg">
-        <i data-lucide="message-square" class="w-4 h-4"></i>
+        <i data-lucide="message-square" class="w-4 h-4" aria-hidden="true"></i>
       </div>
       <div class="p-3.5 rounded-2xl bg-white/5 border border-white/15 rounded-tl-none flex items-center space-x-2">
         <span class="w-2 h-2 rounded-full bg-eco-accent-mint animate-bounce" style="animation-delay: 0ms"></span>

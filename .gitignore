@@ -1,0 +1,24 @@
+# Environment files
+.env
+backend/.env
+
+# Firebase credentials
+backend/firebase-key.json
+
+# Local databases and logs
+backend/local_db.json
+*.log
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db

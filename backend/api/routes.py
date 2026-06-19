@@ -1,10 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Query
 from models.schemas import (
     UserUpdateSchema, 
     CarbonLogInputSchema, 
     RouteAnalyzeRequest, 
-    ChatRequestSchema,
-    LocationConsentSchema
+    ChatRequestSchema
 )
 from services import db_manager, location
 from carbon_engine import calculator, predictor
@@ -19,11 +18,29 @@ async def get_user_profile(user_id: str):
     if not user:
         # Create a new user with this ID
         user = db_manager.update_user(user_id, {})
+        
+    # Calculate historical logging averages to power Smart Flow inputs
+    logs = db_manager.get_carbon_logs(user_id)
+    avg_dist = 15.0
+    avg_elec = 8.0
+    
+    if logs:
+        # Average distance excludes walk/cycle (0 km) to prevent skews on vehicle entries
+        vehicle_logs = [l for l in logs if l["inputs"].get("commute_mode") != "walk_cycle"]
+        if vehicle_logs:
+            avg_dist = sum(l["inputs"].get("commute_distance_km", 15.0) for l in vehicle_logs) / len(vehicle_logs)
+        else:
+            avg_dist = 0.0
+        avg_elec = sum(l["inputs"].get("electricity_kwh", 8.0) for l in logs) / len(logs)
+        
+    user["historical_averages"] = {
+        "commute_distance_km": round(avg_dist, 1),
+        "electricity_kwh": round(avg_elec, 1)
+    }
     return user
 
 @router.post("/user/{user_id}")
 async def update_user_profile(user_id: str, updates: UserUpdateSchema):
-    # Convert preferences to dict if present
     update_dict = updates.model_dump(exclude_unset=True)
     updated_user = db_manager.update_user(user_id, update_dict)
     return updated_user
@@ -31,10 +48,8 @@ async def update_user_profile(user_id: str, updates: UserUpdateSchema):
 @router.get("/carbon/history/{user_id}")
 async def get_carbon_history(user_id: str):
     logs = db_manager.get_carbon_logs(user_id)
-    # Sort logs by date descending
     sorted_logs = sorted(logs, key=lambda x: x["date"], reverse=True)
     
-    # Calculate averages
     avg_emissions = 0.0
     avg_score = 0.0
     if sorted_logs:
@@ -53,7 +68,6 @@ async def get_carbon_history(user_id: str):
 @router.post("/carbon/log/{user_id}/{date_str}")
 async def log_carbon_emissions(user_id: str, date_str: str, inputs: CarbonLogInputSchema):
     try:
-        # Validate date format (YYYY-MM-DD)
         datetime.strptime(date_str, "%Y-%m-%d")
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
@@ -70,24 +84,39 @@ async def log_carbon_emissions(user_id: str, date_str: str, inputs: CarbonLogInp
     
     saved_log = db_manager.save_carbon_log(user_id, date_str, log_data)
     
-    # Dynamically update the Eco Digital Twin based on these inputs
+    # 1. Update the Eco Digital Twin
     twin = db_manager.get_eco_twin(user_id)
     if twin:
         status = twin["current_status"]
-        # Determine status tiers based on inputs
         status["transportation_impact"] = "high" if result["category_breakdown"]["transportation"] > 4.0 else ("medium" if result["category_breakdown"]["transportation"] > 1.5 else "low")
         status["energy_impact"] = "high" if result["category_breakdown"]["energy"] > 6.0 else ("medium" if result["category_breakdown"]["energy"] > 2.5 else "low")
         status["food_impact"] = "high" if result["category_breakdown"]["food"] > 5.0 else ("medium" if result["category_breakdown"]["food"] > 2.0 else "low")
         status["lifestyle_impact"] = "high" if result["category_breakdown"]["lifestyle"] > 3.0 else ("medium" if result["category_breakdown"]["lifestyle"] > 1.0 else "low")
         status["overall_health_score"] = result["carbon_score"]
         
-        # Check weekly roadmap items and auto-complete them if applicable
         for milestone in twin.get("roadmap", []):
             if milestone["week"] == 1 and inputs.commute_mode in ["public_transit", "walk_cycle"] and not milestone["completed"]:
                 milestone["completed"] = True
                 milestone["completedAt"] = datetime.now().isoformat()
                 
         db_manager.update_eco_twin(user_id, twin)
+        
+    # 2. Pre-calculate and cache the ML predictions inside the user profile document (Write Optimization)
+    try:
+        user = db_manager.get_user(user_id)
+        if user:
+            updated_logs = db_manager.get_carbon_logs(user_id)
+            user_profile = {
+                "region": user.get("region", "temperate"),
+                "diet_preference": user.get("preferences", {}).get("diet_preference", "balanced"),
+                "commute_distance_km": user.get("preferences", {}).get("commute_distance_km", 15.0),
+                "commute_mode": user.get("preferences", {}).get("commute_mode", "petrol_bike")
+            }
+            prediction = predictor.predict_next_month_emissions(updated_logs, user_profile)
+            db_manager.update_user(user_id, {"cached_predictions": prediction})
+    except Exception as e:
+        # Non-blocking prediction caching error safeguard
+        print(f"Failed to pre-compute and cache predictions: {e}")
         
     return saved_log
 
@@ -97,9 +126,13 @@ async def get_carbon_prediction(user_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
         
+    # Read from cache if present (Instant O(1) retrieval)
+    cached = user.get("cached_predictions")
+    if cached:
+        return cached
+        
+    # Compute on the fly if cache is not built yet (e.g. new session)
     logs = db_manager.get_carbon_logs(user_id)
-    
-    # Flatten preferences for predictor context
     user_profile = {
         "region": user.get("region", "temperate"),
         "diet_preference": user.get("preferences", {}).get("diet_preference", "balanced"),
@@ -108,6 +141,7 @@ async def get_carbon_prediction(user_id: str):
     }
     
     prediction = predictor.predict_next_month_emissions(logs, user_profile)
+    db_manager.update_user(user_id, {"cached_predictions": prediction})
     return prediction
 
 @router.post("/location/analyze")

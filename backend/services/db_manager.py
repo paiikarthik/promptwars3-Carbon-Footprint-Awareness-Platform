@@ -1,11 +1,15 @@
 import os
 import json
+import threading
 from datetime import datetime, timedelta
 
 # Check if Firebase credentials are provided
 FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS")
 use_firebase = False
 db = None
+
+# Global lock for thread-safe file operations
+file_lock = threading.Lock()
 
 if FIREBASE_CREDENTIALS:
     try:
@@ -31,12 +35,13 @@ if FIREBASE_CREDENTIALS:
 LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "local_db.json")
 
 def load_local_db() -> dict:
-    if os.path.exists(LOCAL_DB_PATH):
-        try:
-            with open(LOCAL_DB_PATH, "r") as f:
-                return json.load(f)
-        except Exception:
-            pass
+    with file_lock:
+        if os.path.exists(LOCAL_DB_PATH):
+            try:
+                with open(LOCAL_DB_PATH, "r") as f:
+                    return json.load(f)
+            except Exception:
+                pass
             
     # Default schema initialization
     default_db = {
@@ -154,11 +159,12 @@ def load_local_db() -> dict:
     return default_db
 
 def save_local_db(data: dict):
-    try:
-        with open(LOCAL_DB_PATH, "w") as f:
-            json.dump(data, f, indent=2)
-    except Exception as e:
-        print(f"Error saving local database: {e}")
+    with file_lock:
+        try:
+            with open(LOCAL_DB_PATH, "w") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            print(f"Error saving local database: {e}")
 
 # Database APIs that route to Firestore or Local DB
 
