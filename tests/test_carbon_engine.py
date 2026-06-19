@@ -11,27 +11,27 @@ from carbon_engine.predictor import predict_next_month_emissions
 
 def test_transport_emissions():
     # Petrol bike: 0.12 kg CO2 / km * 15 km = 1.8 kg CO2
-    assert calculate_transport_emissions(15.0, "petrol_bike") == 1.8
+    assert calculate_transport_emissions(15.0, "petrol_bike") == pytest.approx(1.8)
     # Diesel car: 0.18 kg CO2 / km * 10 km = 1.8 kg CO2
-    assert calculate_transport_emissions(10.0, "diesel_car") == 1.8
+    assert calculate_transport_emissions(10.0, "diesel_car") == pytest.approx(1.8)
     # Walk/Cycle: 0.0 kg CO2 / km
-    assert calculate_transport_emissions(20.0, "walk_cycle") == 0.0
+    assert calculate_transport_emissions(20.0, "walk_cycle") == pytest.approx(0.0)
 
 def test_energy_emissions():
     # Coal power: 0.85 kg CO2 / kWh * 10 kWh = 8.5 kg CO2
-    assert calculate_energy_emissions(10.0, "coal_grid") == 8.5
+    assert calculate_energy_emissions(10.0, "coal_grid") == pytest.approx(8.5)
     # Solar: 0.05 kg CO2 / kWh * 10 kWh = 0.5 kg CO2
-    assert calculate_energy_emissions(10.0, "solar") == 0.5
+    assert calculate_energy_emissions(10.0, "solar") == pytest.approx(0.5)
 
 def test_food_emissions():
-    assert calculate_food_emissions("vegan") == 1.5
-    assert calculate_food_emissions("meat_heavy") == 8.0
+    assert calculate_food_emissions("vegan") == pytest.approx(1.5)
+    assert calculate_food_emissions("meat_heavy") == pytest.approx(8.0)
 
 def test_lifestyle_emissions():
     # 2 purchases * 2.5 + waste_recycled (0.2) = 5.2 kg CO2
-    assert calculate_lifestyle_emissions(2, True) == 5.2
+    assert calculate_lifestyle_emissions(2, True) == pytest.approx(5.2)
     # 0 purchases * 2.5 + waste_landfill (1.5) = 1.5 kg CO2
-    assert calculate_lifestyle_emissions(0, False) == 1.5
+    assert calculate_lifestyle_emissions(0, False) == pytest.approx(1.5)
 
 def test_carbon_score():
     # If daily carbon is low (<= 2.0), score is 100

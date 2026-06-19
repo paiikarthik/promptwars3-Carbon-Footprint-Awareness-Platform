@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoAI Guardian - Carbon Reduction Assistant</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="EcoAI Guardian is an intelligent climate tracking app helping you calculate, forecast, and reduce personal carbon emissions with your AI coach EcoBuddy.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            eco: {
+              bg: {
+                dark: '#080d0a',
+                card: 'rgba(16, 28, 21, 0.65)',
+                input: 'rgba(25, 41, 31, 0.8)',
+              },
+              accent: {
+                green: '#10b981',
+                mint: '#34d399',
+                cyan: '#06b6d4',
+                yellow: '#fbbf24',
+                red: '#f87171'
+              }
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Canvas-Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Local Custom Stylesheet -->
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-eco-bg-dark text-slate-100 antialiased font-sans min-h-screen">
+
+  <div class="flex h-screen overflow-hidden relative">
+    
+    <!-- 1. SIDEBAR NAVIGATION -->
+    <aside class="hidden md:flex md:w-64 flex-col bg-[#070d0a] border-r border-white/5 relative z-20">
+      <div class="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-eco-accent-green/20 via-transparent to-eco-accent-cyan/20"></div>
+      
+      <!-- Brand Logo -->
+      <div class="p-6 border-b border-white/5 flex items-center space-x-2.5">
+        <div class="p-2 bg-gradient-to-br from-eco-accent-green to-eco-accent-mint text-slate-950 rounded-xl font-bold shadow-lg shadow-eco-accent-green/20 animate-pulse">
+          <i data-lucide="leaf" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-md font-extrabold text-white block tracking-wide font-display">EcoAI Guardian</h1>
+          <span class="text-[10px] text-slate-400 font-semibold tracking-wider">Carbon Coach</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex-1 px-4 py-6 space-y-2.5">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition bg-eco-accent-green/10 border border-eco-accent-green/25 text-eco-accent-mint">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('eco-twin')" id="nav-eco-twin" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+          <span>Virtual Eco Twin</span>
+        </button>
+        <button onclick="switchTab('maps')" id="nav-maps" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white">
+          <i data-lucide="map" class="w-5 h-5"></i>
+          <span>Carbon Map Radar</span>
+        </button>
+        <button onclick="switchTab('challenges')" id="nav-challenges" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white">
+          <i data-lucide="trophy" class="w-5 h-5"></i>
+          <span>Challenges Hub</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar footer badge -->
+      <div class="p-4 border-t border-white/5">
+        <div class="flex items-center space-x-3 bg-white/5 p-3 rounded-xl border border-white/5">
+          <div id="user-badge-level" class="w-9 h-9 rounded-lg bg-eco-accent-cyan/20 text-eco-accent-cyan flex items-center justify-center font-bold text-sm">
+            L2
+          </div>
+          <div class="min-w-0 flex-1">
+            <span id="user-badge-name" class="text-xs font-bold text-white block truncate">Eco Pioneer</span>
+            <span id="user-badge-points" class="text-[10px] text-slate-400 block truncate">350 EcoPoints</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MOBILE HEADER -->
+    <div class="md:hidden fixed top-0 left-0 w-full h-14 bg-eco-bg-dark/95 border-b border-white/5 backdrop-blur-md z-30 flex items-center justify-between px-4">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="leaf" class="w-5 h-5 text-eco-accent-green"></i>
+        <span class="font-extrabold text-white text-sm">EcoAI Guardian</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="toggleBuddy()" class="p-2 bg-eco-accent-green/20 text-eco-accent-mint rounded-lg">
+          <i data-lucide="message-square" class="w-4 h-4"></i>
+        </button>
+        <button onclick="toggleMobileMenu()" class="p-2 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- MOBILE MENU DRAWER -->
+    <div id="mobile-menu" class="hidden md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm">
+      <div class="w-64 bg-eco-bg-dark h-full border-r border-white/10 flex flex-col p-4 space-y-4">
+        <div class="flex justify-between items-center pb-4 border-b border-white/5">
+          <span class="font-bold text-white font-display">Eco Navigation</span>
+          <button onclick="toggleMobileMenu()" class="text-slate-400">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <nav class="space-y-2 flex-1">
+          <button onclick="switchTab('dashboard'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition bg-eco-accent-green/10 text-eco-accent-mint border border-eco-accent-green/20">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Dashboard</span>
+          </button>
+          <button onclick="switchTab('eco-twin'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition text-slate-400 hover:bg-white/5">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Virtual Eco Twin</span>
+          </button>
+          <button onclick="switchTab('maps'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition text-slate-400 hover:bg-white/5">
+            <i data-lucide="map" class="w-4 h-4"></i>
+            <span>Carbon Map Radar</span>
+          </button>
+          <button onclick="switchTab('challenges'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition text-slate-400 hover:bg-white/5">
+            <i data-lucide="trophy" class="w-4 h-4"></i>
+            <span>Challenges Hub</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- 2. MAIN VIEWPORT -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative pt-14 md:pt-0">
+      
+      <!-- Hybrid Demo Mode Banner Alert -->
+      <div id="demo-banner" class="hidden bg-gradient-to-r from-sky-950/70 to-emerald-950/70 border-b border-sky-900/50 px-4 py-2 flex items-center justify-between text-xxs sm:text-xs">
+        <div class="flex items-center space-x-2 text-sky-300">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-sky-400"></i>
+          <span>
+            <strong>Demo Mode Active:</strong> Simulating Google APIs & Firestore. Configure credentials in <code>backend/.env</code> to unlock live feeds.
+          </span>
+        </div>
+      </div>
+
+      <!-- Viewport Scroll container -->
+      <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6">
+        
+        <!-- Viewport Header -->
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 id="view-title" class="text-2xl font-extrabold text-white font-display uppercase tracking-wide">Dashboard Overview</h2>
+            <p id="view-subtitle" class="text-xs text-slate-400 mt-1">Monitor daily emissions trends and predictions.</p>
+          </div>
+          
+          <button onclick="toggleBuddy()" class="hidden md:flex items-center space-x-2 px-4 py-2 bg-eco-accent-green/20 hover:bg-eco-accent-green/35 text-eco-accent-mint border border-eco-accent-green/30 text-xs font-bold rounded-xl shadow-lg transition">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            <span>EcoBuddy Coach</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-pane space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <!-- User Summary Box -->
+            <div class="md:col-span-8 glass-card rounded-2xl p-6 border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 relative overflow-hidden">
+              <div class="absolute top-0 left-0 w-1 h-full bg-eco-accent-green"></div>
+              <div class="flex items-center space-x-4">
+                <div class="p-3.5 bg-eco-accent-green/20 text-eco-accent-mint rounded-2xl border border-eco-accent-green/35">
+                  <i data-lucide="user" class="w-8 h-8"></i>
+                </div>
+                <div>
+                  <span class="text-xxs uppercase tracking-wider text-slate-400 font-bold">Sustainability Profile</span>
+                  <h3 id="profile-name" class="text-xl font-bold text-white font-display mt-0.5">Eco Pioneer</h3>
+                  <p class="text-xs text-slate-400 flex items-center mt-1">
+                    <span class="w-2 h-2 rounded-full bg-eco-accent-green mr-1.5 animate-ping"></span>
+                    Location: <strong id="profile-city" class="text-slate-300 ml-1">Metro City</strong>
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Level Indicator -->
+              <div class="w-full md:w-auto md:min-w-[200px] space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-slate-400 font-semibold flex items-center">
+                    <i data-lucide="award" class="w-4 h-4 mr-1 text-eco-accent-cyan"></i>
+                    Level <span id="user-level-num">2</span>
+                  </span>
+                  <span class="text-slate-400"><span id="user-xp-num">350</span> / 500 XP</span>
+                </div>
+                <div class="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/10">
+                  <div id="user-xp-bar" class="h-full bg-gradient-to-r from-eco-accent-green to-eco-accent-cyan transition-all duration-500" style="width: 70%"></div>
+                </div>
+                <div class="flex justify-between items-center text-xxs text-slate-400">
+                  <span class="font-bold text-white uppercase"><span id="user-points-num">350</span> EcoPoints</span>
+                  <span class="flex items-center text-amber-500 font-bold">
+                    <i data-lucide="flame" class="w-3.5 h-3.5 mr-0.5 animate-bounce text-orange-500"></i>
+                    <span id="user-streak-num">5</span> Day Streak
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logger Trigger Box -->
+            <div class="md:col-span-4 glass-card rounded-2xl p-6 border-white/10 flex flex-col justify-between items-stretch">
+              <div>
+                <h4 class="text-sm font-semibold text-slate-300 uppercase tracking-wide">Daily Tracking</h4>
+                <p class="text-xs text-slate-400 mt-1">Consistency is key to reducing carbon footprint.</p>
+              </div>
+              <button onclick="openLogModal()" class="w-full mt-4 py-3 bg-gradient-to-r from-eco-accent-green to-eco-accent-mint hover:from-emerald-500 hover:to-emerald-400 text-slate-950 font-extrabold rounded-xl shadow-lg shadow-eco-accent-green/10 hover:shadow-eco-accent-green/20 transition-all flex items-center justify-center space-x-2">
+                <i data-lucide="leaf" class="w-4 h-4 fill-slate-950"></i>
+                <span>Log Emissions Today</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Circular Score & Chart.js graph -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Radial Score gauge -->
+            <div class="lg:col-span-4 glass-card rounded-2xl p-6 border-white/10 flex flex-col items-center justify-between text-center min-h-[300px]">
+              <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Carbon Health Score</h4>
+              
+              <div class="relative w-44 h-44 flex items-center justify-center my-4">
+                <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
+                  <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none" />
+                  <circle id="score-gauge" cx="50" cy="50" r="40" stroke="#10b981" stroke-width="8" fill="none" stroke-dasharray="251.2" stroke-dashoffset="75" stroke-linecap="round" class="transition-all duration-1000 ease-out" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="score-gauge-num" class="text-4xl font-extrabold font-display text-eco-accent-green">70</span>
+                  <span class="text-xxs uppercase tracking-widest text-slate-400 mt-1 font-bold">Out of 100</span>
+                </div>
+              </div>
+              <p id="score-gauge-tip" class="text-xs text-slate-400">Moderate standing. Small commuting modifications can elevate your score.</p>
+            </div>
+
+            <!-- Chart.js Trend Area -->
+            <div class="lg:col-span-8 glass-card rounded-2xl p-6 border-white/10 min-h-[300px] flex flex-col justify-between">
+              <div class="flex justify-between items-center mb-4">
+                <div>
+                  <h4 class="text-sm font-semibold text-white uppercase tracking-wider font-display">Daily Emission Trend</h4>
+                  <p class="text-xs text-slate-400">Your carbon logs (kg CO2) over the last 7 entries</p>
+                </div>
+                <div class="flex items-center text-xs text-eco-accent-cyan font-semibold">
+                  <i data-lucide="trending-down" class="w-4 h-4 mr-1"></i>
+                  Trend Analysis
+                </div>
+              </div>
+              <!-- Chart viewport -->
+              <div class="w-full h-48 relative">
+                <canvas id="trendChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Stat grids & Predictions -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Avg daily stats -->
+            <div class="glass-card rounded-2xl p-5 border-white/10 flex flex-col justify-between">
+              <span class="text-xxs uppercase tracking-wider text-slate-400 font-bold block">Avg Daily Footprint</span>
+              <div class="flex items-baseline space-x-2 mt-2">
+                <span id="stat-avg-co2" class="text-3xl font-extrabold text-white font-display">12.4</span>
+                <span class="text-xs text-slate-400">kg CO2</span>
+              </div>
+              <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+                <span class="text-slate-400">vs Global Average (15 kg)</span>
+                <span class="text-eco-accent-mint font-semibold flex items-center">
+                  <i data-lucide="trending-down" class="w-3.5 h-3.5 mr-0.5"></i>
+                  -17.3%
+                </span>
+              </div>
+            </div>
+
+            <!-- Simple Breakdown visualizer -->
+            <div class="glass-card rounded-2xl p-5 border-white/10 flex flex-col justify-between">
+              <span class="text-xxs uppercase tracking-wider text-slate-400 font-bold block">Latest Carbon Split</span>
+              <div class="h-16 flex items-end space-x-3.5 mt-2">
+                <div class="flex-1 flex flex-col items-center">
+                  <div class="w-full bg-white/5 rounded-t-sm h-12 flex items-end overflow-hidden border border-white/5">
+                    <div id="split-transport-bar" class="w-full rounded-t-sm bg-eco-accent-green" style="height: 40%"></div>
+                  </div>
+                  <span class="text-xxs text-slate-400 mt-1">Trans</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center">
+                  <div class="w-full bg-white/5 rounded-t-sm h-12 flex items-end overflow-hidden border border-white/5">
+                    <div id="split-energy-bar" class="w-full rounded-t-sm bg-eco-accent-cyan" style="height: 60%"></div>
+                  </div>
+                  <span class="text-xxs text-slate-400 mt-1">Energy</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center">
+                  <div class="w-full bg-white/5 rounded-t-sm h-12 flex items-end overflow-hidden border border-white/5">
+                    <div id="split-food-bar" class="w-full rounded-t-sm bg-amber-400" style="height: 30%"></div>
+                  </div>
+                  <span class="text-xxs text-slate-400 mt-1">Food</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center">
+                  <div class="w-full bg-white/5 rounded-t-sm h-12 flex items-end overflow-hidden border border-white/5">
+                    <div id="split-lifestyle-bar" class="w-full rounded-t-sm bg-eco-accent-red" style="height: 15%"></div>
+                  </div>
+                  <span class="text-xxs text-slate-400 mt-1">Life</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Predictor outputs -->
+            <div class="glass-card rounded-2xl p-5 border-white/10 flex flex-col justify-between relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-12 h-12 bg-eco-accent-cyan/10 rounded-full blur-xl"></div>
+              <span class="text-xxs uppercase tracking-wider text-eco-accent-cyan font-bold block flex items-center">
+                <i data-lucide="zap" class="w-3.5 h-3.5 mr-1 text-eco-accent-cyan"></i>
+                AI Prediction Engine
+              </span>
+              <div id="pred-loading" class="h-20 flex items-center justify-center hidden">
+                <span class="w-2 h-2 bg-eco-accent-cyan rounded-full animate-ping"></span>
+              </div>
+              <div id="pred-details" class="mt-2 space-y-1.5">
+                <div class="flex justify-between items-baseline">
+                  <span class="text-xs text-slate-400">Next Month Est:</span>
+                  <div class="flex items-baseline space-x-1">
+                    <span id="pred-co2-val" class="text-2xl font-bold text-white font-display">340</span>
+                    <span class="text-xxs text-slate-400">kg CO2</span>
+                  </div>
+                </div>
+                <p id="pred-reason-val" class="text-xxs text-slate-400 leading-tight border-t border-white/5 pt-1.5 flex items-start">
+                  <i data-lucide="trending-up" class="w-4 h-4 text-eco-accent-red mr-1 flex-shrink-0"></i>
+                  <span>Expected baseline activity holds steady (+8% seasonal AC change).</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily habits ticking challenge -->
+          <div class="glass-card rounded-2xl p-6 border-white/10">
+            <h4 class="text-md font-bold text-white font-display mb-4 flex items-center space-x-2">
+              <i data-lucide="award" class="w-5 h-5 text-eco-accent-yellow"></i>
+              <span>Today's Gamified Challenges</span>
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div id="daily-sprint-card" class="p-4 rounded-xl border border-white/5 bg-white/5 transition">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <span class="text-xxs font-bold text-eco-accent-green uppercase">Daily Habit</span>
+                    <h5 class="text-sm font-semibold text-white mt-1">Walk or Cycle 5,000 Steps</h5>
+                    <p class="text-xs text-slate-400 mt-1">Avoid vehicles for short journeys to reduce local emissions.</p>
+                  </div>
+                  <input type="checkbox" id="daily-sprint-check" onchange="completeDailySprint()" class="w-5 h-5 rounded accent-eco-accent-green cursor-pointer" />
+                </div>
+                <div class="flex items-center space-x-2 mt-3 text-xxs font-bold text-eco-accent-mint">
+                  <i data-lucide="leaf" class="w-3.5 h-3.5"></i>
+                  <span>+15 Points / +50 XP / Saves ~1.8 kg CO2</span>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl border border-white/5 bg-white/5 flex flex-col justify-between">
+                <div>
+                  <span class="text-xxs font-bold text-eco-accent-cyan uppercase">Weekly Sprint</span>
+                  <h5 class="text-sm font-semibold text-white mt-1">Reduce Home AC Usage</h5>
+                  <p class="text-xs text-slate-400 mt-1">Lessen cooling system load by 1 hour daily to reduce power consumption.</p>
+                </div>
+                <div class="flex items-center justify-between mt-3 text-xxs font-bold text-eco-accent-cyan">
+                  <span class="flex items-center">
+                    <i data-lucide="flame" class="w-3.5 h-3.5 mr-0.5 text-amber-500"></i>
+                    Saves ~20 kg CO2 / month
+                  </span>
+                  <span class="text-slate-400">Join in Challenges tab</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Privacy Action -->
+          <div class="pt-6 flex justify-end">
+            <button onclick="deleteProfileData()" class="px-4 py-2 border border-eco-accent-red/25 hover:bg-eco-accent-red/10 text-eco-accent-red text-xs font-semibold rounded-lg transition flex items-center space-x-1">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>Delete My Environmental Profile</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 2: ECO TWIN -->
+        <div id="tab-eco-twin" class="tab-pane hidden space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Tree SVG panel -->
+            <div class="lg:col-span-5 glass-card rounded-2xl p-6 flex flex-col items-center justify-between border-white/10 relative overflow-hidden">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-eco-accent-green to-eco-accent-cyan"></div>
+              <div class="w-full text-center mb-2">
+                <h4 class="text-lg font-semibold text-white font-display">Virtual Eco Twin</h4>
+                <p class="text-xs text-slate-400">Your digital environmental reflections</p>
+              </div>
+
+              <!-- SVG Tree -->
+              <div class="w-full max-w-[220px] aspect-square flex items-center justify-center my-4 animate-float">
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                  <path d="M 30 170 Q 100 160 170 170" stroke="#1f2937" stroke-width="4" fill="none" />
+                  <path d="M 50 170 Q 100 162 150 170" stroke="#10b981" stroke-width="2" stroke-dasharray="3,3" fill="none" />
+                  
+                  <path d="M 92 170 L 96 110 Q 98 100 90 90 Q 82 80 84 70" stroke="#78350f" stroke-width="8" fill="none" stroke-linecap="round" />
+                  <path d="M 108 170 L 104 110 Q 102 100 110 90 Q 118 80 116 70" stroke="#78350f" stroke-width="8" fill="none" stroke-linecap="round" />
+                  <path d="M 100 170 L 100 100" stroke="#92400e" stroke-width="12" fill="none" stroke-linecap="round" />
+                  
+                  <path d="M 98 120 Q 85 105 75 110" stroke="#78350f" stroke-width="4" fill="none" stroke-linecap="round" />
+                  <path d="M 102 115 Q 118 98 128 102" stroke="#78350f" stroke-width="4" fill="none" stroke-linecap="round" />
+                  
+                  <!-- Dynamic Leaf structures injected via JS -->
+                  <g id="twin-leaves-group"></g>
+
+                  <circle cx="100" cy="155" r="22" fill="#080d0a" stroke="#10b981" stroke-width="3" />
+                  <text x="100" y="150" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="bold">Score</text>
+                  <text id="twin-score-val" x="100" y="165" text-anchor="middle" fill="#10b981" font-size="14" font-weight="extrabold">70</text>
+                </svg>
+              </div>
+
+              <!-- Status metrics -->
+              <div class="w-full text-center">
+                <span id="twin-status-tag" class="text-md font-bold uppercase tracking-wider text-eco-accent-yellow">Eco Steady</span>
+                <div class="mt-3 grid grid-cols-2 gap-2 w-full text-left">
+                  <div class="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col justify-between">
+                    <span class="text-xxs text-slate-400 uppercase font-semibold">Transport</span>
+                    <span id="twin-badge-transport" class="mt-1"></span>
+                  </div>
+                  <div class="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col justify-between">
+                    <span class="text-xxs text-slate-400 uppercase font-semibold">Home Energy</span>
+                    <span id="twin-badge-energy" class="mt-1"></span>
+                  </div>
+                  <div class="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col justify-between">
+                    <span class="text-xxs text-slate-400 uppercase font-semibold">Food Diet</span>
+                    <span id="twin-badge-food" class="mt-1"></span>
+                  </div>
+                  <div class="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col justify-between">
+                    <span class="text-xxs text-slate-400 uppercase font-semibold">Lifestyle</span>
+                    <span id="twin-badge-lifestyle" class="mt-1"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Roadmap checklists -->
+            <div class="lg:col-span-7 glass-card rounded-2xl p-6 border-white/10 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center space-x-2 text-eco-accent-cyan mb-4">
+                  <i data-lucide="milestone" class="w-5 h-5"></i>
+                  <h4 class="text-lg font-semibold font-display text-white">Your Personal Roadmap</h4>
+                </div>
+                
+                <div id="roadmap-items-container" class="space-y-4">
+                  <!-- Injected via app.js -->
+                </div>
+              </div>
+              
+              <div class="mt-4 pt-4 border-t border-white/5 text-xs text-slate-400">
+                🌱 Tip: Completing roadmap actions dynamically improves your Digital Twin's vitality score and rewards you with extra sustainability badges.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 3: CARBON MAP -->
+        <div id="tab-maps" class="tab-pane hidden space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Sidebar routing -->
+            <div class="lg:col-span-4 space-y-6">
+              <!-- Map Layers -->
+              <div class="glass-card rounded-2xl p-5 border-white/10 space-y-4">
+                <h4 class="text-sm font-semibold text-white uppercase tracking-wider font-display flex items-center">
+                  <i data-lucide="layers" class="w-4 h-4 mr-2 text-eco-accent-green"></i>
+                  Carbon Map Layers
+                </h4>
+                <div class="grid grid-cols-3 gap-2">
+                  <button onclick="toggleMapLayer('all')" id="layer-btn-all" class="py-2 px-2 text-xs rounded-lg border font-medium transition border-eco-accent-green bg-eco-accent-green/20 text-white">Standard</button>
+                  <button onclick="toggleMapLayer('traffic')" id="layer-btn-traffic" class="py-2 px-2 text-xs rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Emissions</button>
+                  <button onclick="toggleMapLayer('green')" id="layer-btn-green" class="py-2 px-2 text-xs rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Greenery</button>
+                </div>
+
+                <div class="pt-2 border-t border-white/5 space-y-2">
+                  <label class="text-xs text-slate-400 block font-semibold uppercase">Filter Sustainable Places</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button onclick="changePoiType('recycling')" id="poi-btn-recycling" class="py-2 px-3 text-xs rounded-lg border font-medium transition flex items-center space-x-1.5 border-white/20 bg-white/15 text-white">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5 text-amber-400"></i>
+                      <span>Recycling</span>
+                    </button>
+                    <button onclick="changePoiType('ev_charging')" id="poi-btn-ev_charging" class="py-2 px-3 text-xs rounded-lg border font-medium transition flex items-center space-x-1.5 border-white/5 bg-white/5 text-slate-400">
+                      <i data-lucide="zap" class="w-3.5 h-3.5 text-cyan-400"></i>
+                      <span>EV Charge</span>
+                    </button>
+                    <button onclick="changePoiType('public_transport')" id="poi-btn-public_transport" class="py-2 px-3 text-xs rounded-lg border font-medium transition flex items-center space-x-1.5 border-white/5 bg-white/5 text-slate-400">
+                      <i data-lucide="bus" class="w-3.5 h-3.5 text-emerald-400"></i>
+                      <span>Bus Transit</span>
+                    </button>
+                    <button onclick="changePoiType('sustainable_shop')" id="poi-btn-sustainable_shop" class="py-2 px-3 text-xs rounded-lg border font-medium transition flex items-center space-x-1.5 border-white/5 bg-white/5 text-slate-400">
+                      <i data-lucide="footprints" class="w-3.5 h-3.5 text-eco-accent-mint"></i>
+                      <span>Eco Shops</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Route comparator -->
+              <div class="glass-card rounded-2xl p-5 border-white/10 space-y-4">
+                <h4 class="text-sm font-semibold text-white uppercase tracking-wider font-display flex items-center">
+                  <i data-lucide="compass" class="w-4 h-4 mr-2 text-eco-accent-cyan"></i>
+                  Route Emission Finder
+                </h4>
+                <form onsubmit="runRouteAnalysis(event)" class="space-y-3">
+                  <div class="space-y-1 relative">
+                    <label class="text-xxs text-slate-400 font-bold uppercase">Origin</label>
+                    <div class="flex items-center">
+                      <i data-lucide="map-pin" class="w-4 h-4 text-eco-accent-cyan absolute left-3"></i>
+                      <input type="text" id="route-origin" value="Home" placeholder="Origin" class="w-full pl-9 pr-3 py-2 bg-eco-bg-input border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-eco-accent-cyan" required />
+                    </div>
+                  </div>
+                  <div class="space-y-1 relative">
+                    <label class="text-xxs text-slate-400 font-bold uppercase">Destination</label>
+                    <div class="flex items-center">
+                      <i data-lucide="navigation" class="w-4 h-4 text-eco-accent-green absolute left-3"></i>
+                      <input type="text" id="route-destination" value="College" placeholder="Destination" class="w-full pl-9 pr-3 py-2 bg-eco-bg-input border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-eco-accent-green" required />
+                    </div>
+                  </div>
+                  <button type="submit" class="w-full py-2.5 bg-eco-accent-cyan hover:bg-cyan-600 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center">
+                    <span>Compare Commute Modes</span>
+                  </button>
+                </form>
+
+                <!-- Route analysis outcomes -->
+                <div id="route-results-container" class="hidden pt-3 border-t border-white/5 space-y-3">
+                  <div class="text-xxs text-slate-400 font-bold uppercase flex justify-between">
+                    <span>Distance: <span id="route-distance-val">15</span> km</span>
+                    <span>Time: <span id="route-duration-val">25</span> mins</span>
+                  </div>
+                  <div id="route-modes-list" class="space-y-2 max-h-36 overflow-y-auto pr-1"></div>
+                  <p id="route-recommendation-val" class="text-xxs text-eco-accent-mint font-semibold leading-relaxed border-t border-white/5 pt-2"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Map View Area -->
+            <div class="lg:col-span-8 glass-card rounded-2xl p-4 border-white/10 flex flex-col justify-between min-h-[500px]">
+              <div class="flex justify-between items-center mb-3">
+                <div>
+                  <h3 class="text-md font-bold text-white font-display">City Sustainability Radar</h3>
+                  <p class="text-xs text-slate-400">Emission intensity map for Metro City</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xxs font-bold bg-white/5 border border-white/10 text-slate-400">
+                  Interactive SVG Map Engine
+                </span>
+              </div>
+
+              <!-- Animated SVG Map Canvas -->
+              <div class="flex-1 border border-white/10 rounded-xl relative overflow-hidden bg-[#070b09] shadow-inner aspect-[4/3] flex items-center justify-center">
+                <svg id="svg-city-map" viewBox="0 0 200 150" class="w-full h-full select-none">
+                  <!-- Grid -->
+                  <g stroke="rgba(255, 255, 255, 0.03)" stroke-width="0.5">
+                    <line x1="20" y1="0" x2="20" y2="150" /><line x1="40" y1="0" x2="40" y2="150" /><line x1="60" y1="0" x2="60" y2="150" /><line x1="80" y1="0" x2="80" y2="150" /><line x1="100" y1="0" x2="100" y2="150" /><line x1="120" y1="0" x2="120" y2="150" /><line x1="140" y1="0" x2="140" y2="150" /><line x1="160" y1="0" x2="160" y2="150" /><line x1="180" y1="0" x2="180" y2="150" />
+                    <line x1="0" y1="20" x2="200" y2="20" /><line x1="0" y1="40" x2="200" y2="40" /><line x1="0" y1="60" x2="200" y2="60" /><line x1="0" y1="80" x2="200" y2="80" /><line x1="0" y1="100" x2="200" y2="100" /><line x1="0" y1="120" x2="200" y2="120" />
+                  </g>
+                  <!-- Paths -->
+                  <path d="M 0,35 Q 70,30 130,90 T 200,80" fill="none" stroke="rgba(6, 182, 212, 0.15)" stroke-width="1.5" stroke-dasharray="3,2" />
+                  <path d="M 40,0 Q 110,60 110,150" fill="none" stroke="rgba(16, 185, 129, 0.15)" stroke-width="1.5" stroke-dasharray="4,3" />
+
+                  <!-- Glowing Zone layers -->
+                  <g id="map-zones-layer"></g>
+
+                  <!-- Dynamic Pins -->
+                  <g id="map-pins-layer"></g>
+                </svg>
+
+                <!-- Legend -->
+                <div class="absolute bottom-4 left-4 p-2 bg-eco-bg-dark/90 border border-white/10 rounded-lg text-[9px] space-y-1.5 backdrop-blur-md">
+                  <span class="font-bold text-white uppercase block">Map Legend</span>
+                  <div class="flex items-center space-x-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-eco-accent-red/40 border border-eco-accent-red/60 inline-block"></span>
+                    <span class="text-slate-300">High Emission Zones</span>
+                  </div>
+                  <div class="flex items-center space-x-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-eco-accent-green/45 border border-eco-accent-green/60 inline-block"></span>
+                    <span class="text-slate-300">Carbon Sink Reserves</span>
+                  </div>
+                  <div class="flex items-center space-x-1.5">
+                    <span class="w-2.5 h-2.5 rounded bg-amber-400 inline-block"></span>
+                    <span class="text-slate-300">Sustainable Pins (POIs)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 4: CHALLENGES -->
+        <div id="tab-challenges" class="tab-pane hidden space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Challenge Cards panel -->
+            <div class="lg:col-span-7 space-y-6">
+              <div class="glass-card rounded-2xl p-4 border-white/10 flex flex-wrap gap-2 items-center justify-between">
+                <span class="text-xs font-semibold text-white uppercase tracking-wider font-display">Active Sprints</span>
+                <div class="flex flex-wrap gap-1">
+                  <button onclick="filterChallenges('all')" id="chal-filter-all" class="py-1.5 px-3 text-xxs rounded-lg border transition border-eco-accent-green bg-eco-accent-green/20 text-white font-bold">All</button>
+                  <button onclick="filterChallenges('global')" id="chal-filter-global" class="py-1.5 px-3 text-xxs rounded-lg border transition border-white/5 bg-white/5 text-slate-400">Global</button>
+                  <button onclick="filterChallenges('city')" id="chal-filter-city" class="py-1.5 px-3 text-xxs rounded-lg border transition border-white/5 bg-white/5 text-slate-400">City</button>
+                  <button onclick="filterChallenges('college')" id="chal-filter-college" class="py-1.5 px-3 text-xxs rounded-lg border transition border-white/5 bg-white/5 text-slate-400">College</button>
+                  <button onclick="filterChallenges('workplace')" id="chal-filter-workplace" class="py-1.5 px-3 text-xxs rounded-lg border transition border-white/5 bg-white/5 text-slate-400">Work</button>
+                </div>
+              </div>
+
+              <!-- Injected Challenges list -->
+              <div id="challenges-list" class="space-y-4"></div>
+            </div>
+
+            <!-- Leaderboard & Trophy Case -->
+            <div class="lg:col-span-5 space-y-6">
+              <!-- Leaderboard Box -->
+              <div class="glass-card rounded-2xl p-5 border-white/10 flex flex-col justify-between">
+                <div class="flex items-center space-x-2 text-eco-accent-yellow mb-4">
+                  <i data-lucide="trophy" class="w-5 h-5 text-eco-accent-yellow"></i>
+                  <h4 class="text-sm font-semibold text-white uppercase tracking-wider font-display">Leaderboard (Carbon Saved)</h4>
+                </div>
+                <!-- Injected Leaderboard -->
+                <div id="leaderboard-container" class="space-y-3 max-h-[360px] overflow-y-auto pr-1"></div>
+              </div>
+
+              <!-- Trophy case -->
+              <div class="glass-card rounded-2xl p-5 border-white/10">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Trophy Case</h4>
+                <div id="trophies-container" class="flex flex-wrap gap-2.5">
+                  <!-- Badges injected here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- 3. COLLAPSIBLE ECOBUDDY CHAT PANEL -->
+    <div id="buddy-drawer" class="fixed inset-y-0 right-0 z-40 w-full sm:w-[420px] bg-eco-bg-dark border-l border-white/10 shadow-2xl transform translate-x-full transition-drawer">
+      <button onclick="toggleBuddy()" class="absolute top-4 left-4 p-1.5 bg-eco-bg-dark/80 border border-white/10 text-slate-400 hover:text-white rounded-lg transition z-50">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="h-full pt-12 flex flex-col justify-between">
+        <!-- Chat Header -->
+        <div class="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="p-2 bg-eco-accent-green/20 text-eco-accent-mint rounded-lg">
+              <i data-lucide="sparkles" class="w-5 h-5 animate-pulse"></i>
+            </div>
+            <div>
+              <span class="font-bold text-white block text-sm">EcoBuddy Coach</span>
+              <span class="text-xxs text-eco-accent-mint flex items-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-eco-accent-green mr-1 inline-block animate-ping"></span>
+                AI Advisor Online
+              </span>
+            </div>
+          </div>
+          <button onclick="clearBuddyChat()" class="p-1.5 hover:bg-white/10 text-slate-400 hover:text-white rounded-lg transition" title="Clear Chat">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Chat History -->
+        <div id="buddy-chat-history" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+
+        <!-- Preloaded Suggestion chips -->
+        <div id="buddy-suggestion-chips" class="p-3 bg-white/5 border-t border-white/5 flex flex-wrap gap-1.5 justify-center">
+          <button onclick="sendBuddyQuery('Why did my electric bill go up?')" class="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xxs font-medium text-slate-300 hover:text-white transition">Electric Bill Spike</button>
+          <button onclick="sendBuddyQuery('How can I reduce food waste?')" class="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xxs font-medium text-slate-300 hover:text-white transition">Food Waste Tip</button>
+          <button onclick="sendBuddyQuery('Suggestions for a green commute')" class="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xxs font-medium text-slate-300 hover:text-white transition">Green Commuting</button>
+        </div>
+
+        <!-- Input Field Form -->
+        <div class="p-3 border-t border-white/10 bg-white/5 flex items-center space-x-2">
+          <input type="text" id="buddy-input" onkeydown="checkBuddySubmit(event)" placeholder="Ask EcoBuddy a question..." class="flex-1 px-4 py-2 bg-eco-bg-input border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-eco-accent-green placeholder-slate-500" />
+          <button onclick="submitBuddyQuery()" class="p-2.5 bg-eco-accent-green hover:bg-emerald-600 text-slate-900 font-bold rounded-xl shadow-lg transition">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. MODALS: DAILY LOG DIALOG -->
+    <div id="log-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4">
+      <div class="w-full max-w-xl glass-card rounded-2xl overflow-hidden shadow-2xl border-white/10 relative">
+        <button onclick="closeLogModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <div class="p-6 border-b border-white/10 bg-white/5">
+          <h3 class="text-xl font-semibold font-display text-white">Log Daily Activities</h3>
+          <p class="text-sm text-slate-400">Record your footprint for today to keep your streak alive!</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+          
+          <!-- Step 1: Transport -->
+          <div id="log-step-1" class="log-form-step space-y-4">
+            <div class="flex items-center space-x-2 text-eco-accent-green">
+              <i data-lucide="bike" class="w-6 h-6"></i>
+              <h4 class="font-semibold text-lg text-white">Transportation</h4>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="text-sm text-slate-300 block">Commute Mode</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <button type="button" onclick="selectCommuteMode('petrol_bike')" id="mode-btn-petrol_bike" class="commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Petrol Bike</button>
+                <button type="button" onclick="selectCommuteMode('diesel_car')" id="mode-btn-diesel_car" class="commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Diesel Car</button>
+                <button type="button" onclick="selectCommuteMode('ev')" id="mode-btn-ev" class="commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">EV Car</button>
+                <button type="button" onclick="selectCommuteMode('public_transit')" id="mode-btn-public_transit" class="commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Bus/Metro</button>
+                <button type="button" onclick="selectCommuteMode('walk_cycle')" id="mode-btn-walk_cycle" class="commute-mode-btn px-3 py-2.5 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Walk/Cycle</button>
+              </div>
+            </div>
+
+            <div id="commute-distance-section" class="space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-slate-300">Daily Travel Distance</span>
+                <span class="text-eco-accent-green font-semibold"><span id="slider-distance-num">15</span> km</span>
+              </div>
+              <input type="range" id="input-distance" min="1" max="100" value="15" oninput="updateDistanceSliderVal(this.value)" class="w-full accent-eco-accent-green bg-white/10 rounded-lg appearance-none h-2" />
+            </div>
+
+            <div class="flex justify-end pt-4">
+              <button type="button" onclick="setLogStep(2)" class="px-5 py-2 bg-eco-accent-green hover:bg-emerald-600 text-slate-900 font-bold rounded-lg transition">Next: Energy</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Energy -->
+          <div id="log-step-2" class="log-form-step hidden space-y-4">
+            <div class="flex items-center space-x-2 text-eco-accent-cyan">
+              <i data-lucide="zap" class="w-6 h-6"></i>
+              <h4 class="font-semibold text-lg text-white">Electricity & Household</h4>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-slate-300">Electricity Usage (Today)</span>
+                <span class="text-eco-accent-cyan font-semibold"><span id="slider-electricity-num">8</span> kWh</span>
+              </div>
+              <input type="range" id="input-electricity" min="1" max="40" value="8" oninput="updateElectricitySliderVal(this.value)" class="w-full accent-eco-accent-cyan bg-white/10 rounded-lg appearance-none h-2" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-slate-300 block">Home Energy Source</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="selectEnergySource('coal_grid')" id="source-btn-coal_grid" class="energy-source-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Coal Power</button>
+                <button type="button" onclick="selectEnergySource('mixed_grid')" id="source-btn-mixed_grid" class="energy-source-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Mixed Grid</button>
+                <button type="button" onclick="selectEnergySource('solar')" id="source-btn-solar" class="energy-source-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Solar/Renew</button>
+              </div>
+            </div>
+
+            <div class="flex justify-between pt-4">
+              <button type="button" onclick="setLogStep(1)" class="px-5 py-2 border border-white/10 hover:bg-white/5 text-white rounded-lg transition">Back</button>
+              <button type="button" onclick="setLogStep(3)" class="px-5 py-2 bg-eco-accent-cyan hover:bg-cyan-600 text-slate-900 font-bold rounded-lg transition">Next: Lifestyle</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Diet & Lifestyle -->
+          <div id="log-step-3" class="log-form-step hidden space-y-4">
+            <div class="flex items-center space-x-2 text-amber-400">
+              <i data-lucide="utensils" class="w-6 h-6"></i>
+              <h4 class="font-semibold text-lg text-white">Diet & Lifestyle</h4>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-slate-300 block">Diet Preference (Today)</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="selectDiet('meat_heavy')" id="diet-btn-meat_heavy" class="diet-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Meat Heavy</button>
+                <button type="button" onclick="selectDiet('balanced')" id="diet-btn-balanced" class="diet-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Balanced</button>
+                <button type="button" onclick="selectDiet('vegetarian')" id="diet-btn-vegetarian" class="diet-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Vegetarian</button>
+                <button type="button" onclick="selectDiet('vegan')" id="diet-btn-vegan" class="diet-btn px-3 py-2 text-sm rounded-lg border font-medium transition border-white/10 bg-white/5 text-slate-400">Vegan</button>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-slate-300 block">New Purchases (Shopping)</label>
+              <div class="flex items-center space-x-3">
+                <input type="number" id="input-purchases" min="0" value="0" class="w-24 px-3 py-2 bg-eco-bg-input border border-white/10 rounded-lg text-white text-center focus:outline-none" />
+                <span class="text-sm text-slate-400">items purchased today (clothes, gadgets, etc.)</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-white/5">
+              <div>
+                <span class="text-sm font-semibold text-white block">Waste Management</span>
+                <span class="text-xs text-slate-400">Did you sort and recycle your waste today?</span>
+              </div>
+              <input type="checkbox" id="input-recycled" class="w-5 h-5 rounded accent-eco-accent-green cursor-pointer" />
+            </div>
+
+            <div class="flex justify-between pt-4 border-t border-white/10">
+              <button type="button" onclick="setLogStep(2)" class="px-5 py-2 border border-white/10 hover:bg-white/5 text-white rounded-lg transition">Back</button>
+              <button type="button" onclick="submitCarbonLog()" class="px-6 py-2 bg-eco-accent-green hover:bg-emerald-600 text-slate-900 font-bold rounded-lg shadow-lg hover:shadow-eco-accent-green/20 transition">Submit Log</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Local Orchestrator script -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

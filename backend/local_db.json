@@ -1,673 +1,35 @@
 {
   "users": {
     "demo_user": {
-      "displayName": "Eco Pioneer",
-      "email": "pioneer@ecoai.org",
-      "createdAt": "2026-06-19T19:02:17.941415",
+      "displayName": "Eco Warrior",
+      "email": "user@eco.com",
+      "createdAt": "2026-06-19T19:12:41.886786",
       "location_enabled": true,
       "city": "Metro City",
       "region": "temperate",
       "latitude": 47.6062,
       "longitude": -122.3321,
       "preferences": {
-        "commute_mode": "petrol_bike",
-        "commute_distance_km": 15.0,
+        "commute_mode": "walk_cycle",
+        "commute_distance_km": 0.0,
         "diet_preference": "balanced",
         "home_energy_source": "mixed_grid"
       },
-      "points": 350,
-      "xp": 1350,
-      "level": 2,
-      "streak": 5,
-      "last_active_date": "2026-06-18",
+      "points": 250,
+      "xp": 1000,
+      "level": 3,
+      "streak": 0,
       "badges": [
         {
-          "id": "first_step",
-          "name": "First Step",
-          "description": "Completed first carbon log",
-          "awardedAt": "2026-06-19T19:02:17.941475"
-        },
-        {
-          "id": "commute_champion",
-          "name": "Commute Champ",
-          "description": "Used public transit 3 days in a row",
-          "awardedAt": "2026-06-19T19:02:17.941481"
+          "id": "challenge_winner",
+          "name": "Eco Champion",
+          "description": "Completed first community carbon challenge",
+          "awardedAt": "2026-06-19T19:13:30.005883"
         }
       ]
     }
   },
-  "carbon_logs": {
-    "demo_user_2026-05-20": {
-      "userId": "demo_user",
-      "date": "2026-05-20",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 2.7
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 1,
-        "waste_recycled": true
-      },
-      "total_emissions": 11.3,
-      "carbon_score": 66
-    },
-    "demo_user_2026-05-21": {
-      "userId": "demo_user",
-      "date": "2026-05-21",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 12.57,
-      "carbon_score": 62
-    },
-    "demo_user_2026-05-22": {
-      "userId": "demo_user",
-      "date": "2026-05-22",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 11.95,
-      "carbon_score": 64
-    },
-    "demo_user_2026-05-23": {
-      "userId": "demo_user",
-      "date": "2026-05-23",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 11.9,
-      "carbon_score": 64
-    },
-    "demo_user_2026-05-24": {
-      "userId": "demo_user",
-      "date": "2026-05-24",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 11.27,
-      "carbon_score": 66
-    },
-    "demo_user_2026-05-25": {
-      "userId": "demo_user",
-      "date": "2026-05-25",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 4.0
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 1,
-        "waste_recycled": false
-      },
-      "total_emissions": 15.75,
-      "carbon_score": 50
-    },
-    "demo_user_2026-05-26": {
-      "userId": "demo_user",
-      "date": "2026-05-26",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 8.8,
-      "carbon_score": 75
-    },
-    "demo_user_2026-05-27": {
-      "userId": "demo_user",
-      "date": "2026-05-27",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 10.78,
-      "carbon_score": 68
-    },
-    "demo_user_2026-05-28": {
-      "userId": "demo_user",
-      "date": "2026-05-28",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 11.95,
-      "carbon_score": 64
-    },
-    "demo_user_2026-05-29": {
-      "userId": "demo_user",
-      "date": "2026-05-29",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 11.9,
-      "carbon_score": 64
-    },
-    "demo_user_2026-05-30": {
-      "userId": "demo_user",
-      "date": "2026-05-30",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 2.7
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 1,
-        "waste_recycled": true
-      },
-      "total_emissions": 13.77,
-      "carbon_score": 57
-    },
-    "demo_user_2026-05-31": {
-      "userId": "demo_user",
-      "date": "2026-05-31",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 13.25,
-      "carbon_score": 59
-    },
-    "demo_user_2026-06-01": {
-      "userId": "demo_user",
-      "date": "2026-06-01",
-      "category_breakdown": {
-        "transportation": 1.8,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 10.6,
-      "carbon_score": 69
-    },
-    "demo_user_2026-06-02": {
-      "userId": "demo_user",
-      "date": "2026-06-02",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 10.78,
-      "carbon_score": 68
-    },
-    "demo_user_2026-06-03": {
-      "userId": "demo_user",
-      "date": "2026-06-03",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "petrol_bike",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 10.15,
-      "carbon_score": 70
-    },
-    "demo_user_2026-06-04": {
-      "userId": "demo_user",
-      "date": "2026-06-04",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 4.0
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 1,
-        "waste_recycled": false
-      },
-      "total_emissions": 13.2,
-      "carbon_score": 60
-    },
-    "demo_user_2026-06-05": {
-      "userId": "demo_user",
-      "date": "2026-06-05",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 10.07,
-      "carbon_score": 71
-    },
-    "demo_user_2026-06-06": {
-      "userId": "demo_user",
-      "date": "2026-06-06",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 12.05,
-      "carbon_score": 64
-    },
-    "demo_user_2026-06-07": {
-      "userId": "demo_user",
-      "date": "2026-06-07",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 9.4,
-      "carbon_score": 73
-    },
-    "demo_user_2026-06-08": {
-      "userId": "demo_user",
-      "date": "2026-06-08",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 11.38,
-      "carbon_score": 66
-    },
-    "demo_user_2026-06-09": {
-      "userId": "demo_user",
-      "date": "2026-06-09",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 2.7
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 1,
-        "waste_recycled": true
-      },
-      "total_emissions": 12.65,
-      "carbon_score": 61
-    },
-    "demo_user_2026-06-10": {
-      "userId": "demo_user",
-      "date": "2026-06-10",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 10.1,
-      "carbon_score": 71
-    },
-    "demo_user_2026-06-11": {
-      "userId": "demo_user",
-      "date": "2026-06-11",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 10.07,
-      "carbon_score": 71
-    },
-    "demo_user_2026-06-12": {
-      "userId": "demo_user",
-      "date": "2026-06-12",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 12.05,
-      "carbon_score": 64
-    },
-    "demo_user_2026-06-13": {
-      "userId": "demo_user",
-      "date": "2026-06-13",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 9.4,
-      "carbon_score": 73
-    },
-    "demo_user_2026-06-14": {
-      "userId": "demo_user",
-      "date": "2026-06-14",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 4.0
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 1,
-        "waste_recycled": false
-      },
-      "total_emissions": 13.88,
-      "carbon_score": 57
-    },
-    "demo_user_2026-06-15": {
-      "userId": "demo_user",
-      "date": "2026-06-15",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 10.75,
-      "carbon_score": 68
-    },
-    "demo_user_2026-06-16": {
-      "userId": "demo_user",
-      "date": "2026-06-16",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 3.6,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 8.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 10.1,
-      "carbon_score": 71
-    },
-    "demo_user_2026-06-17": {
-      "userId": "demo_user",
-      "date": "2026-06-17",
-      "category_breakdown": {
-        "transportation": 0.0,
-        "energy": 4.28,
-        "food": 5.0,
-        "lifestyle": 0.2
-      },
-      "inputs": {
-        "commute_distance_km": 0.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 9.5,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": true
-      },
-      "total_emissions": 9.47,
-      "carbon_score": 73
-    },
-    "demo_user_2026-06-18": {
-      "userId": "demo_user",
-      "date": "2026-06-18",
-      "category_breakdown": {
-        "transportation": 0.6,
-        "energy": 4.95,
-        "food": 5.0,
-        "lifestyle": 1.5
-      },
-      "inputs": {
-        "commute_distance_km": 15.0,
-        "commute_mode": "public_transit",
-        "electricity_kwh": 11.0,
-        "home_energy_source": "mixed_grid",
-        "diet_preference": "balanced",
-        "shopping_purchases": 0,
-        "waste_recycled": false
-      },
-      "total_emissions": 12.05,
-      "carbon_score": 64
-    }
-  },
+  "carbon_logs": {},
   "challenges": {
     "chal_1": {
       "id": "chal_1",
@@ -683,7 +45,8 @@
         "test_user_99"
       ],
       "completed_by": [
-        "test_user_99"
+        "test_user_99",
+        "demo_user"
       ]
     },
     "chal_2": {
@@ -695,8 +58,12 @@
       "category": "food",
       "scope": "global",
       "scope_name": "Global Community",
-      "participants": [],
-      "completed_by": []
+      "participants": [
+        "demo_user"
+      ],
+      "completed_by": [
+        "demo_user"
+      ]
     },
     "chal_3": {
       "id": "chal_3",
@@ -718,39 +85,32 @@
   "eco_twin": {
     "demo_user": {
       "current_status": {
-        "transportation_impact": "high",
+        "transportation_impact": "medium",
         "energy_impact": "medium",
         "food_impact": "medium",
-        "lifestyle_impact": "low",
-        "overall_health_score": 62
+        "lifestyle_impact": "medium",
+        "overall_health_score": 50
       },
       "roadmap": [
         {
           "week": 1,
-          "milestone": "Transit Trial",
-          "action": "Swap bike for bus 3 days this week",
-          "target_saving": 7.5,
-          "completed": true
+          "milestone": "Green Commute",
+          "action": "Walk or cycle for short journeys",
+          "target_saving": 5.0,
+          "completed": false
         },
         {
           "week": 2,
-          "milestone": "Energy Audit",
-          "action": "Turn off standby appliances at night",
-          "target_saving": 3.0,
+          "milestone": "AC Saver",
+          "action": "Set AC cooling to 24 degrees C",
+          "target_saving": 6.5,
           "completed": false
         },
         {
           "week": 3,
-          "milestone": "Green Dining",
-          "action": "Try two entirely plant-based dinners",
-          "target_saving": 4.5,
-          "completed": false
-        },
-        {
-          "week": 4,
-          "milestone": "Waste Watch",
-          "action": "Recycle all papers and plastic packaging",
-          "target_saving": 2.0,
+          "milestone": "Veggie Switch",
+          "action": "Swap meat for vegetables in 3 dinners",
+          "target_saving": 4.0,
           "completed": false
         }
       ]
