@@ -1,55 +1,38 @@
-# Carbon Footprint Calculator Engine
-
-# Emission factors (kg CO2 per unit)
-EMISSION_FACTORS = {
-    "transportation": {
-        "petrol_bike": 0.12,     # per km
-        "diesel_car": 0.18,      # per km
-        "ev": 0.05,              # per km (depending on grid)
-        "public_transit": 0.04,  # per km
-        "walk_cycle": 0.00       # per km
-    },
-    "energy": {
-        "coal_grid": 0.85,       # per kWh
-        "mixed_grid": 0.45,      # per kWh
-        "solar": 0.05            # per kWh
-    },
-    "food": {
-        "meat_heavy": 8.0,       # per day
-        "balanced": 5.0,         # per day
-        "vegetarian": 2.5,       # per day
-        "vegan": 1.5             # per day
-    },
-    "lifestyle": {
-        "purchase": 2.5,         # per shopping purchase
-        "waste_landfill": 1.5,   # per day if not recycling
-        "waste_recycled": 0.2    # per day if recycling
-    }
-}
+from carbon_engine.constants import (
+    AVERAGE_USER_DAILY_CO2,
+    DEFAULT_COMMUTE_MODE,
+    DEFAULT_DIET,
+    DEFAULT_ENERGY_SOURCE,
+    ENERGY_EMISSION_FACTORS,
+    FOOD_EMISSION_FACTORS,
+    LIFESTYLE_EMISSION_FACTORS,
+    TARGET_USER_DAILY_CO2,
+    TRANSPORT_EMISSION_FACTORS,
+)
 
 # Average emissions benchmarks (kg CO2 per day)
 BENCHMARKS = {
-    "average_user_daily": 15.0,
-    "target_user_daily": 6.0
+    "average_user_daily": AVERAGE_USER_DAILY_CO2,
+    "target_user_daily": TARGET_USER_DAILY_CO2
 }
 
 def calculate_transport_emissions(distance_km: float, mode: str) -> float:
-    factor = EMISSION_FACTORS["transportation"].get(mode, 0.12)
+    factor = TRANSPORT_EMISSION_FACTORS.get(mode, TRANSPORT_EMISSION_FACTORS[DEFAULT_COMMUTE_MODE])
     return distance_km * factor
 
 def calculate_energy_emissions(kwh: float, source: str) -> float:
-    factor = EMISSION_FACTORS["energy"].get(source, 0.45)
+    factor = ENERGY_EMISSION_FACTORS.get(source, ENERGY_EMISSION_FACTORS[DEFAULT_ENERGY_SOURCE])
     return kwh * factor
 
 def calculate_food_emissions(diet_type: str) -> float:
-    return EMISSION_FACTORS["food"].get(diet_type, 5.0)
+    return FOOD_EMISSION_FACTORS.get(diet_type, FOOD_EMISSION_FACTORS[DEFAULT_DIET])
 
 def calculate_lifestyle_emissions(purchases: int, recycled: bool) -> float:
-    shopping_co2 = purchases * EMISSION_FACTORS["lifestyle"]["purchase"]
+    shopping_co2 = purchases * LIFESTYLE_EMISSION_FACTORS["purchase"]
     waste_co2 = (
-        EMISSION_FACTORS["lifestyle"]["waste_recycled"] 
+        LIFESTYLE_EMISSION_FACTORS["waste_recycled"]
         if recycled else 
-        EMISSION_FACTORS["lifestyle"]["waste_landfill"]
+        LIFESTYLE_EMISSION_FACTORS["waste_landfill"]
     )
     return shopping_co2 + waste_co2
 
@@ -89,11 +72,11 @@ def calculate_total_footprint(inputs: dict) -> dict:
     
     energy_co2 = calculate_energy_emissions(
         inputs.get("electricity_kwh", 0.0),
-        inputs.get("home_energy_source", "mixed_grid")
+        inputs.get("home_energy_source", DEFAULT_ENERGY_SOURCE)
     )
     
     food_co2 = calculate_food_emissions(
-        inputs.get("diet_preference", "balanced")
+        inputs.get("diet_preference", DEFAULT_DIET)
     )
     
     lifestyle_co2 = calculate_lifestyle_emissions(
