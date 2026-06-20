@@ -109,7 +109,23 @@ graph TD
 
 ---
 
-## 8. API Setup Instructions
+## 8. Quality Checks
+
+Run these before submission:
+
+```bash
+python -m pytest
+python -m ruff check . --no-cache
+```
+
+Current verified status:
+* 19 automated tests passing across API, validation, security headers, carbon calculations, predictions, and local persistence.
+* Ruff static analysis passing with no lint violations.
+* Runtime state, local secrets, caches, and compiled Python artifacts excluded from Git, Docker, and Google Cloud uploads.
+
+---
+
+## 9. API Setup Instructions
 
 * **Google Gemini API Key**: Get a key from the [Google AI Studio](https://aistudio.google.com/). Set `GEMINI_API_KEY` in `backend/.env`.
 * **Google Maps API Key**: Set up a project in [Google Cloud Console](https://console.cloud.google.com/), enable the *Maps JavaScript API*, *Directions API*, and *Places API*, and generate an API key. Set `GOOGLE_MAPS_API_KEY` in `backend/.env`.
@@ -117,14 +133,15 @@ graph TD
 
 ---
 
-## 9. Security & Privacy
+## 10. Security & Privacy
 1. **User Location Control**: User coordinates are only analyzed locally in the browser or sent to Maps APIs with explicit user permission. A location consent settings card is provided.
-2. **Encrypted Operations**: Firestore database access rules block unauthorized readers. In Demo Mode, information is kept locally in `backend/local_db.json`.
-3. **Data Deletion**: In compliance with privacy standards, a "Delete My Environmental Profile" button clears all user profiles, logs, and Eco Twin states from memory and disk.
+2. **Hardened API Defaults**: CORS is restricted through `CORS_ALLOWED_ORIGINS`, HTTP security headers are applied, and string inputs are validated against basic script injection patterns.
+3. **Encrypted Operations**: Firestore database access rules block unauthorized readers. In Demo Mode, information is kept locally in `backend/local_db.json`.
+4. **Data Deletion**: In compliance with privacy standards, a "Delete My Environmental Profile" button clears all user profiles, logs, and Eco Twin states from memory and disk.
 
 ---
 
-## 10. Future Improvements
+## 11. Future Improvements
 * **Automated Smart Meter Integration**: Connect smart meters (e.g. Sense) to automate electricity logging.
 * **Wearable Health Sync**: Read steps directly from Google Fit or Apple Health to automatically log walking offsets.
 * **Collaborative Challenges**: Enable users to form clubs and participate in team vs team sustainability brackets.
