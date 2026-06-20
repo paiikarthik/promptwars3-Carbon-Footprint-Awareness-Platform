@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, Query
 from models.schemas import (
     UserUpdateSchema, 
@@ -20,6 +22,7 @@ from carbon_engine.constants import (
 from ai_engine import ecobuddy
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 CATEGORIES = ("transportation", "energy", "food", "lifestyle")
 
@@ -153,9 +156,9 @@ async def log_carbon_emissions(user_id: str, date_str: str, inputs: CarbonLogInp
             user_profile = build_user_profile(user)
             prediction = predictor.predict_next_month_emissions(updated_logs, user_profile)
             db_manager.update_user(user_id, {"cached_predictions": prediction})
-    except Exception as e:
+    except Exception:
         # Non-blocking prediction caching error safeguard
-        print(f"Failed to pre-compute and cache predictions: {e}")
+        logger.exception("Failed to pre-compute and cache predictions")
         
     return saved_log
 
@@ -328,8 +331,8 @@ async def get_personalized_insights(user_id: str):
         },
         "energy": {
             "title": "Optimize Heating & Cooling",
-            "description": f"Home electricity represents {highest_pct}% of your carbon load. Setting your AC to 24°C and unplugging standby loads cuts down on phantom energy draw.",
-            "action": "Adjust AC thermostat to 24°C and set a sleep timer.",
+            "description": f"Home electricity represents {highest_pct}% of your carbon load. Setting your AC to 24 degrees C and unplugging standby loads cuts down on phantom energy draw.",
+            "action": "Adjust AC thermostat to 24 degrees C and set a sleep timer.",
             "estimated_saving_kg": 20.0,
             "difficulty": "Easy",
             "challenge_id": "chal_3"

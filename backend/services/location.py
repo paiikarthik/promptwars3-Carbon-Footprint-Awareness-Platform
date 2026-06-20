@@ -1,8 +1,10 @@
 import os
+import logging
 import httpx
 from math import radians, cos, sin, asin, sqrt
 from carbon_engine.constants import DEFAULT_COMMUTE_MODE, TRANSPORT_EMISSION_FACTORS
 
+logger = logging.getLogger(__name__)
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 HTTP_TIMEOUT_SECONDS = 10.0
 
@@ -43,8 +45,8 @@ def analyze_route_emissions(origin: str, destination: str, current_mode: str = D
                     leg = data["routes"][0]["legs"][0]
                     distance_km = leg["distance"]["value"] / 1000.0
                     duration_mins = leg["duration"]["value"] / 60.0
-        except Exception as e:
-            print(f"Error querying Google Directions API: {e}")
+        except httpx.HTTPError:
+            logger.exception("Error querying Google Directions API")
 
     modes_comparison = []
     for mode, factor in TRANSPORT_EMISSION_FACTORS.items():
@@ -137,8 +139,8 @@ def find_nearby_sustainable_places(latitude: float, longitude: float, place_type
                         ), 2)
                     })
                 return results
-        except Exception as e:
-            print(f"Error querying Google Places API: {e}")
+        except httpx.HTTPError:
+            logger.exception("Error querying Google Places API")
 
     # Fallback/Mock sustainable locations around user coords
     mock_data = {

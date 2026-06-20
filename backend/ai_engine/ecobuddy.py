@@ -1,5 +1,8 @@
 import os
+import logging
 from google import genai
+
+logger = logging.getLogger(__name__)
 
 # Initialize Gemini if API key exists
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -8,8 +11,8 @@ client = None
 if GEMINI_API_KEY:
     try:
         client = genai.Client(api_key=GEMINI_API_KEY)
-    except Exception as e:
-        print(f"Failed to initialize Gemini Client: {e}")
+    except Exception:
+        logger.exception("Failed to initialize Gemini Client")
         client = None
 
 # High-fidelity mock responses for fallback mode
@@ -119,8 +122,8 @@ def ask_ecobuddy(query: str, user_context: dict) -> str:
                 contents=full_prompt
             )
             return response.text
-        except Exception as e:
-            print(f"Gemini API invocation error, using fallback: {e}")
+        except Exception:
+            logger.exception("Gemini API invocation error, using fallback")
             # Fall back to mock response matching
             
     # Mock matching logic

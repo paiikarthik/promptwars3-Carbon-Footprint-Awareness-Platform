@@ -7,6 +7,30 @@ def test_api_health():
     response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json()["status"] == "online"
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["x-frame-options"] == "DENY"
+
+def test_rejects_script_injection():
+    response = client.post(
+        "/api/ai/chat",
+        json={"query": "<script>alert('xss')</script>", "user_id": "demo_user"},
+    )
+    assert response.status_code == 422
+
+def test_rejects_invalid_carbon_log_date():
+    response = client.post(
+        "/api/carbon/log/test_user_99/20-06-2026",
+        json={
+            "commute_distance_km": 10.0,
+            "commute_mode": "diesel_car",
+            "electricity_kwh": 5.0,
+            "home_energy_source": "mixed_grid",
+            "diet_preference": "balanced",
+            "shopping_purchases": 1,
+            "waste_recycled": True,
+        },
+    )
+    assert response.status_code == 400
 
 def test_user_endpoints():
     # Test GET user (creates if not existing)

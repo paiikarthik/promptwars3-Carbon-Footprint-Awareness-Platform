@@ -1,7 +1,10 @@
 import os
 import json
 import threading
+import logging
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 # Check if Firebase credentials are provided
 FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS")
@@ -27,9 +30,9 @@ if FIREBASE_CREDENTIALS:
         firebase_admin.initialize_app(cred)
         db = firestore.client()
         use_firebase = True
-        print("Firebase Admin successfully initialized. Using Firestore.")
-    except Exception as e:
-        print(f"Failed to initialize Firebase, falling back to local JSON database. Error: {e}")
+        logger.info("Firebase Admin successfully initialized. Using Firestore.")
+    except Exception:
+        logger.exception("Failed to initialize Firebase, falling back to local JSON database")
 
 # Local JSON Database Fallback Path
 LOCAL_DB_PATH = os.getenv(
@@ -59,8 +62,8 @@ def load_local_db() -> dict:
             try:
                 with open(LOCAL_DB_PATH, "r") as f:
                     return json.load(f)
-            except Exception:
-                pass
+            except (OSError, json.JSONDecodeError):
+                logger.exception("Failed to load local database; reinitializing fallback data")
             
     # Default schema initialization
     default_db = {
@@ -182,8 +185,8 @@ def save_local_db(data: dict):
         try:
             with open(LOCAL_DB_PATH, "w") as f:
                 json.dump(data, f, indent=2)
-        except Exception as e:
-            print(f"Error saving local database: {e}")
+        except OSError:
+            logger.exception("Error saving local database")
 
 # Database APIs that route to Firestore or Local DB
 
@@ -422,8 +425,8 @@ def get_leaderboard() -> list:
                     "points": u.get("points", 0),
                     "streak": u.get("streak", 0)
                 })
-        except Exception as e:
-            print(f"Error building Firestore leaderboard: {e}")
+        except Exception:
+            logger.exception("Error building Firestore leaderboard")
     else:
         local_db = load_local_db()
         users = local_db["users"]
@@ -473,6 +476,7 @@ def delete_carbon_log(user_id: str, date_str: str) -> bool:
                 ref.update({"cached_predictions": None})
             return True
         except Exception:
+            logger.exception("Error deleting Firestore carbon log")
             return False
     else:
         local_db = load_local_db()
