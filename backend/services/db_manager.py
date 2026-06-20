@@ -389,34 +389,54 @@ def get_leaderboard() -> list:
     Ranks users by Carbon Saved (gamified, points / emissions saved).
     Since we have mock users and users can improve, we generate a nice ranks list.
     """
-    local_db = load_local_db()
-    users = local_db["users"]
-    
-    # Calculate carbon saved for leaderboard
     leaderboard_list = []
     
-    # Add main active users
-    for uid, u in users.items():
-        # Calculate carbon saved
-        # Default target vs actual logs average
-        logs = [log for log in local_db["carbon_logs"].values() if log["userId"] == uid]
-        saved_co2 = 0.0
-        if logs:
-            avg_log_emissions = sum(l["total_emissions"] for l in logs) / len(logs)
-            # Baseline is average human (15 kg). Savings = 15 - user_avg
-            saved_co2 = max(0.0, (15.0 - avg_log_emissions) * len(logs))
-        else:
-            # Baseline if no logs
-            saved_co2 = (u.get("points", 0) * 0.1)
+    if use_firebase:
+        try:
+            users_docs = db.collection("users").stream()
+            users = {doc.id: doc.to_dict() for doc in users_docs}
+            logs_docs = db.collection("carbon_logs").stream()
+            logs_list = [doc.to_dict() for doc in logs_docs]
             
-        leaderboard_list.append({
-            "userId": uid,
-            "displayName": u["displayName"],
-            "city": u.get("city", "Metro City"),
-            "carbon_saved_kg": round(saved_co2, 1),
-            "points": u.get("points", 0),
-            "streak": u.get("streak", 0)
-        })
+            for uid, u in users.items():
+                u_logs = [l for l in logs_list if l.get("userId") == uid]
+                saved_co2 = 0.0
+                if u_logs:
+                    avg_log_emissions = sum(l.get("total_emissions", 0.0) for l in u_logs) / len(u_logs)
+                    saved_co2 = max(0.0, (15.0 - avg_log_emissions) * len(u_logs))
+                else:
+                    saved_co2 = (u.get("points", 0) * 0.1)
+                    
+                leaderboard_list.append({
+                    "userId": uid,
+                    "displayName": u.get("displayName", "Eco Warrior"),
+                    "city": u.get("city", "Metro City"),
+                    "carbon_saved_kg": round(saved_co2, 1),
+                    "points": u.get("points", 0),
+                    "streak": u.get("streak", 0)
+                })
+        except Exception as e:
+            print(f"Error building Firestore leaderboard: {e}")
+    else:
+        local_db = load_local_db()
+        users = local_db["users"]
+        for uid, u in users.items():
+            logs = [log for log in local_db["carbon_logs"].values() if log["userId"] == uid]
+            saved_co2 = 0.0
+            if logs:
+                avg_log_emissions = sum(l["total_emissions"] for l in logs) / len(logs)
+                saved_co2 = max(0.0, (15.0 - avg_log_emissions) * len(logs))
+            else:
+                saved_co2 = (u.get("points", 0) * 0.1)
+                
+            leaderboard_list.append({
+                "userId": uid,
+                "displayName": u["displayName"],
+                "city": u.get("city", "Metro City"),
+                "carbon_saved_kg": round(saved_co2, 1),
+                "points": u.get("points", 0),
+                "streak": u.get("streak", 0)
+            })
         
     # Inject 4 mock contenders to make the community leaderboard look rich and competitive!
     mock_competitors = [
@@ -433,6 +453,30 @@ def get_leaderboard() -> list:
         entry["rank"] = index + 1
         
     return leaderboard_list
+
+def delete_carbon_log(user_id: str, date_str: str) -> bool:
+    if use_firebase:
+        try:
+            log_id = f"{user_id}_{date_str}"
+            db.collection("carbon_logs").document(log_id).delete()
+            # Invalidate predictions cache
+            ref = db.collection("users").document(user_id)
+            user_doc = ref.get()
+            if user_doc.exists:
+                ref.update({"cached_predictions": None})
+            return True
+        except Exception:
+            return False
+    else:
+        local_db = load_local_db()
+        log_id = f"{user_id}_{date_str}"
+        if log_id in local_db["carbon_logs"]:
+            del local_db["carbon_logs"][log_id]
+            if user_id in local_db["users"]:
+                local_db["users"][user_id]["cached_predictions"] = None
+            save_local_db(local_db)
+            return True
+        return False
 
 def delete_user_data(user_id: str):
     if use_firebase:

@@ -221,3 +221,120 @@ async def get_community_leaderboard():
 async def delete_user(user_id: str):
     db_manager.delete_user_data(user_id)
     return {"status": "success", "message": "All user carbon logs, profile data, and Eco Twin states deleted."}
+
+@router.delete("/carbon/log/{user_id}/{date_str}")
+async def delete_carbon_log_route(user_id: str, date_str: str):
+    success = db_manager.delete_carbon_log(user_id, date_str)
+    if not success:
+        raise HTTPException(status_code=404, detail="Carbon log not found for this date.")
+        
+    # Re-calculate and update the twin profile using remaining logs
+    logs = db_manager.get_carbon_logs(user_id)
+    twin = db_manager.get_eco_twin(user_id)
+    if twin:
+        if logs:
+            avg_trans = sum(l["category_breakdown"]["transportation"] for l in logs) / len(logs)
+            avg_energy = sum(l["category_breakdown"]["energy"] for l in logs) / len(logs)
+            avg_food = sum(l["category_breakdown"]["food"] for l in logs) / len(logs)
+            avg_life = sum(l["category_breakdown"]["lifestyle"] for l in logs) / len(logs)
+            avg_score = sum(l["carbon_score"] for l in logs) / len(logs)
+            
+            status = twin["current_status"]
+            status["transportation_impact"] = "high" if avg_trans > 4.0 else ("medium" if avg_trans > 1.5 else "low")
+            status["energy_impact"] = "high" if avg_energy > 6.0 else ("medium" if avg_energy > 2.5 else "low")
+            status["food_impact"] = "high" if avg_food > 5.0 else ("medium" if avg_food > 2.0 else "low")
+            status["lifestyle_impact"] = "high" if avg_life > 3.0 else ("medium" if avg_life > 1.0 else "low")
+            status["overall_health_score"] = int(avg_score)
+        else:
+            status = twin["current_status"]
+            status["transportation_impact"] = "medium"
+            status["energy_impact"] = "medium"
+            status["food_impact"] = "medium"
+            status["lifestyle_impact"] = "medium"
+            status["overall_health_score"] = 50
+            
+        db_manager.update_eco_twin(user_id, twin)
+        
+    return {"status": "success", "message": "Carbon log deleted and Eco Twin recalculated."}
+
+@router.get("/carbon/insights/{user_id}")
+async def get_personalized_insights(user_id: str):
+    logs = db_manager.get_carbon_logs(user_id)
+    user = db_manager.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+        
+    avg_emissions = {"transportation": 0.0, "energy": 0.0, "food": 0.0, "lifestyle": 0.0}
+    total_avg = 0.0
+    
+    if logs:
+        for log in logs:
+            breakdown = log.get("category_breakdown", {})
+            for cat in avg_emissions:
+                avg_emissions[cat] += breakdown.get(cat, 0.0)
+        num_logs = len(logs)
+        for cat in avg_emissions:
+            avg_emissions[cat] = round(avg_emissions[cat] / num_logs, 2)
+            total_avg += avg_emissions[cat]
+    else:
+        pref = user.get("preferences", {})
+        food_baselines = {"meat_heavy": 8.0, "balanced": 5.0, "vegetarian": 2.5, "vegan": 1.5}
+        avg_emissions["food"] = food_baselines.get(pref.get("diet_preference", "balanced"), 5.0)
+        
+        modes = {"petrol_bike": 0.12, "diesel_car": 0.18, "ev": 0.05, "public_transit": 0.04, "walk_cycle": 0.0}
+        avg_emissions["transportation"] = pref.get("commute_distance_km", 15.0) * modes.get(pref.get("commute_mode", "petrol_bike"), 0.12)
+        
+        avg_emissions["energy"] = 8.0 * (0.85 if pref.get("home_energy_source") == "coal_grid" else (0.05 if pref.get("home_energy_source") == "solar" else 0.45))
+        avg_emissions["lifestyle"] = 1.0
+        total_avg = sum(avg_emissions.values())
+
+    total_avg = max(0.1, total_avg)
+    
+    sorted_cats = sorted(avg_emissions.items(), key=lambda x: x[1], reverse=True)
+    highest_cat, highest_val = sorted_cats[0]
+    highest_pct = round((highest_val / total_avg) * 100, 1)
+    
+    recommendations = {
+        "transportation": {
+            "title": "Switch Commuting Mode",
+            "description": f"Transportation accounts for {highest_pct}% of your footprint. Walking, cycling, or using public transit just 3 days a week can significantly lower your daily {highest_val} kg CO2 commute impact.",
+            "action": "Take public transit on your next commute.",
+            "estimated_saving_kg": 30.0,
+            "difficulty": "Medium",
+            "challenge_id": "chal_1"
+        },
+        "energy": {
+            "title": "Optimize Heating & Cooling",
+            "description": f"Home electricity represents {highest_pct}% of your carbon load. Setting your AC to 24°C and unplugging standby loads cuts down on phantom energy draw.",
+            "action": "Adjust AC thermostat to 24°C and set a sleep timer.",
+            "estimated_saving_kg": 20.0,
+            "difficulty": "Easy",
+            "challenge_id": "chal_3"
+        },
+        "food": {
+            "title": "Embrace Plant-Based Dining",
+            "description": f"Your dietary preferences account for {highest_pct}% of your footprint. Shifting to vegetarian or vegan options for lunch/dinner a few times a week reduces food-related carbon output.",
+            "action": "Choose vegetarian or vegan meals for 3 consecutive days.",
+            "estimated_saving_kg": 7.2,
+            "difficulty": "Easy",
+            "challenge_id": "chal_2"
+        },
+        "lifestyle": {
+            "title": "Reduce waste & sort packaging",
+            "description": f"Shopping and landfill waste comprise {highest_pct}% of your footprint. Sorting recyclables (plastic, paper, metals) and planning meals avoids waste rot emissions.",
+            "action": "Sort and recycle all daily garbage items.",
+            "estimated_saving_kg": 5.0,
+            "difficulty": "Easy",
+            "challenge_id": "chal_2"
+        }
+    }
+    
+    insight = recommendations.get(highest_cat, recommendations["energy"])
+    
+    return {
+        "highest_category": highest_cat,
+        "highest_emissions_co2": highest_val,
+        "highest_pct": highest_pct,
+        "insight": insight,
+        "breakdown": avg_emissions
+    }

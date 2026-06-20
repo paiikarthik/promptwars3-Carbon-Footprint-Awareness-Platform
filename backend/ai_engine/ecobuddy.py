@@ -1,18 +1,17 @@
 import os
-import google.generativeai as genai
+from google import genai
 from datetime import datetime
 
 # Initialize Gemini if API key exists
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-model = None
+client = None
 
 if GEMINI_API_KEY:
     try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        client = genai.Client(api_key=GEMINI_API_KEY)
     except Exception as e:
-        print(f"Failed to initialize Gemini API: {e}")
-        model = None
+        print(f"Failed to initialize Gemini Client: {e}")
+        client = None
 
 # High-fidelity mock responses for fallback mode
 MOCK_RESPONSES = [
@@ -93,7 +92,7 @@ def ask_ecobuddy(query: str, user_context: dict) -> str:
     """
     Sends the user's query and context to Gemini or generates a premium simulated response.
     """
-    if model:
+    if client:
         try:
             # Build rich prompt with user context
             system_instruction = (
@@ -116,7 +115,10 @@ def ask_ecobuddy(query: str, user_context: dict) -> str:
             )
             
             full_prompt = f"{system_instruction}\n\n{context_prompt}"
-            response = model.generate_content(full_prompt)
+            response = client.models.generate_content(
+                model="gemini-1.5-flash",
+                contents=full_prompt
+            )
             return response.text
         except Exception as e:
             print(f"Gemini API invocation error, using fallback: {e}")

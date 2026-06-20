@@ -25,6 +25,7 @@ window.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeLogModal();
+      closeScoreInfoModal();
       const drawer = document.getElementById('buddy-drawer');
       if (drawer && !drawer.classList.contains('translate-x-full')) {
         drawer.classList.add('translate-x-full');
@@ -124,14 +125,16 @@ function switchTab(tabId) {
   // Show target tab pane
   document.getElementById(`tab-${tabId}`).classList.remove('hidden');
   
-  // Update sidebar buttons style
+  // Update sidebar buttons style and WAI-ARIA states
   document.querySelectorAll('aside nav button').forEach(btn => {
     btn.className = "w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green";
+    btn.setAttribute('aria-selected', 'false');
   });
   
   const activeBtn = document.getElementById(`nav-${tabId}`);
   if (activeBtn) {
     activeBtn.className = "w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition bg-eco-accent-green/10 border border-eco-accent-green/25 text-eco-accent-mint focus:outline-none";
+    activeBtn.setAttribute('aria-selected', 'true');
   }
 
   // Adjust View titles
@@ -139,7 +142,8 @@ function switchTab(tabId) {
     'dashboard': { t: 'Dashboard Overview', s: 'Monitor daily emissions trends and predictions.' },
     'eco-twin': { t: 'Eco Digital Twin', s: 'Reflect your sustainability choices visually.' },
     'maps': { t: 'Carbon Map Radar', s: 'Navigate green POIs and route carbon emissions.' },
-    'challenges': { t: 'Challenges & Leaderboard', s: 'Rank up by saving carbon in community milestones.' }
+    'challenges': { t: 'Challenges & Leaderboard', s: 'Rank up by saving carbon in community milestones.' },
+    'history': { t: 'Logs Manager', s: 'Track and audit your historical footprint logs.' }
   };
   
   document.getElementById('view-title').innerText = titleMap[tabId].t;
@@ -150,12 +154,15 @@ function switchTab(tabId) {
 
   if (tabId === 'dashboard') {
     renderTrendChart();
+    fetchPersonalizedInsights();
   } else if (tabId === 'eco-twin') {
     renderEcoTwin();
   } else if (tabId === 'maps') {
     renderCityMap();
   } else if (tabId === 'challenges') {
     renderChallenges();
+  } else if (tabId === 'history') {
+    renderHistoryLogs();
   }
 }
 
@@ -205,6 +212,7 @@ function renderDashboard() {
 
   // Draw trend graph
   renderTrendChart();
+  fetchPersonalizedInsights();
 }
 
 function renderTrendChart() {
@@ -999,4 +1007,120 @@ function toggleMobileMenu() {
   } else {
     menu.classList.add('hidden');
   }
+}
+
+// 13. Personalized AI Action Insights
+let activeInsightChallengeId = null;
+
+async function fetchPersonalizedInsights() {
+  const loadingEl = document.getElementById('insights-loading');
+  const containerEl = document.getElementById('insights-container');
+  if (!loadingEl || !containerEl) return;
+  
+  loadingEl.classList.remove('hidden');
+  containerEl.classList.add('hidden');
+  
+  try {
+    const res = await fetch('/api/carbon/insights/demo_user');
+    if (!res.ok) throw new Error("Failed to fetch insights");
+    const data = await res.json();
+    
+    const insight = data.insight;
+    document.getElementById('insight-title').innerText = insight.title;
+    document.getElementById('insight-desc').innerText = insight.description;
+    document.getElementById('insight-saving').innerText = insight.estimated_saving_kg;
+    document.getElementById('insight-difficulty').innerText = insight.difficulty;
+    
+    activeInsightChallengeId = insight.challenge_id;
+    
+    // Update button text
+    const actionBtn = document.getElementById('insight-action-btn').querySelector('span');
+    actionBtn.innerText = "Join Target Challenge";
+    
+    loadingEl.classList.add('hidden');
+    containerEl.classList.remove('hidden');
+  } catch (err) {
+    console.error("Personalized insights loading error:", err);
+    loadingEl.classList.add('hidden');
+  }
+}
+
+function commitInsightAction() {
+  if (activeInsightChallengeId) {
+    switchTab('challenges');
+    setTimeout(() => {
+      const challengeEl = document.getElementById('challenges-list');
+      if (challengeEl) {
+        challengeEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 150);
+  }
+}
+
+// 14. Carbon Logging History Manager
+function renderHistoryLogs() {
+  const tbody = document.getElementById('history-logs-tbody');
+  if (!tbody || !historyState) return;
+  
+  const logs = historyState.logs;
+  if (!logs || logs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-500">No logs tracked yet. Go log today's footprint!</td></tr>`;
+    return;
+  }
+  
+  let html = '';
+  logs.forEach(log => {
+    const inputs = log.inputs;
+    const date = log.date;
+    const score = log.carbon_score;
+    const scoreColor = score >= 75 ? 'text-eco-accent-mint font-bold' : (score >= 50 ? 'text-eco-accent-yellow font-bold' : 'text-eco-accent-red font-bold');
+    
+    const commuteName = inputs.commute_mode.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const energySource = inputs.home_energy_source.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const dietName = inputs.diet_preference.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    
+    html += `
+      <tr class="border-b border-white/5 hover:bg-white/5 transition">
+        <td class="p-3 font-semibold text-slate-300">${date}</td>
+        <td class="p-3 ${scoreColor}">${score}</td>
+        <td class="p-3 font-bold text-white">${log.total_emissions} kg</td>
+        <td class="p-3 text-slate-300">${commuteName}</td>
+        <td class="p-3 text-slate-400">${inputs.commute_distance_km} km</td>
+        <td class="p-3 text-slate-300">${inputs.electricity_kwh} kWh (${energySource})</td>
+        <td class="p-3 text-slate-300">${dietName}</td>
+        <td class="p-3 text-right">
+          <button onclick="deleteHistoryLog('${date}')" aria-label="Delete carbon log for ${date}" class="px-2.5 py-1 text-xxs font-bold rounded-lg border border-eco-accent-red/20 text-eco-accent-red hover:bg-eco-accent-red/10 transition focus:outline-none">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+  
+  tbody.innerHTML = html;
+}
+
+async function deleteHistoryLog(date) {
+  if (confirm(`Are you sure you want to delete your carbon record for ${date}? This will update your score and Eco Twin status.`)) {
+    try {
+      const res = await fetch(`/api/carbon/log/demo_user/${date}`, { method: 'DELETE' });
+      if (res.ok) {
+        loadUserSession();
+        setTimeout(() => {
+          renderHistoryLogs();
+        }, 150);
+      }
+    } catch (err) {
+      console.error("Failed to delete carbon log:", err);
+    }
+  }
+}
+
+// 15. Score Explanation Modal handlers
+function openScoreInfoModal() {
+  document.getElementById('score-info-modal').classList.remove('hidden');
+}
+
+function closeScoreInfoModal() {
+  document.getElementById('score-info-modal').classList.add('hidden');
 }

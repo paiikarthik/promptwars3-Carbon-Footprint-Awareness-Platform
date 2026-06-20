@@ -76,22 +76,26 @@
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="flex-1 px-4 py-6 space-y-2.5" aria-label="Main Navigation">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" aria-label="View Dashboard" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition bg-eco-accent-green/10 border border-eco-accent-green/25 text-eco-accent-mint focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
+      <nav class="flex-1 px-4 py-6 space-y-2.5" role="tablist" aria-label="Main Navigation">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" role="tab" aria-selected="true" aria-controls="tab-dashboard" aria-label="View Dashboard" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition bg-eco-accent-green/10 border border-eco-accent-green/25 text-eco-accent-mint focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
           <i data-lucide="layout-dashboard" class="w-5 h-5" aria-hidden="true"></i>
           <span>Dashboard</span>
         </button>
-        <button onclick="switchTab('eco-twin')" id="nav-eco-twin" aria-label="View Virtual Eco Twin Profile" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
+        <button onclick="switchTab('eco-twin')" id="nav-eco-twin" role="tab" aria-selected="false" aria-controls="tab-eco-twin" aria-label="View Virtual Eco Twin Profile" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
           <i data-lucide="sparkles" class="w-5 h-5" aria-hidden="true"></i>
           <span>Virtual Eco Twin</span>
         </button>
-        <button onclick="switchTab('maps')" id="nav-maps" aria-label="View City Carbon Map" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
+        <button onclick="switchTab('maps')" id="nav-maps" role="tab" aria-selected="false" aria-controls="tab-maps" aria-label="View City Carbon Map" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
           <i data-lucide="map" class="w-5 h-5" aria-hidden="true"></i>
           <span>Carbon Map Radar</span>
         </button>
-        <button onclick="switchTab('challenges')" id="nav-challenges" aria-label="View Community Challenges" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
+        <button onclick="switchTab('challenges')" id="nav-challenges" role="tab" aria-selected="false" aria-controls="tab-challenges" aria-label="View Community Challenges" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
           <i data-lucide="trophy" class="w-5 h-5" aria-hidden="true"></i>
           <span>Challenges Hub</span>
+        </button>
+        <button onclick="switchTab('history')" id="nav-history" role="tab" aria-selected="false" aria-controls="tab-history" aria-label="View Carbon Logging History" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition border border-transparent text-slate-400 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
+          <i data-lucide="history" class="w-5 h-5" aria-hidden="true"></i>
+          <span>Logs Manager</span>
         </button>
       </nav>
 
@@ -151,6 +155,10 @@
             <i data-lucide="trophy" class="w-4 h-4" aria-hidden="true"></i>
             <span>Challenges Hub</span>
           </button>
+          <button onclick="switchTab('history'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition text-slate-400 hover:bg-white/5 focus:outline-none">
+            <i data-lucide="history" class="w-4 h-4" aria-hidden="true"></i>
+            <span>Logs Manager</span>
+          </button>
         </nav>
       </div>
     </div>
@@ -185,7 +193,7 @@
         </div>
 
         <!-- TAB CONTENT 1: DASHBOARD -->
-        <div id="tab-dashboard" class="tab-pane space-y-6">
+        <div id="tab-dashboard" class="tab-pane space-y-6" role="tabpanel" aria-labelledby="nav-dashboard">
           <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
             <!-- User Summary Box -->
             <div class="md:col-span-8 glass-card rounded-2xl p-6 border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 relative overflow-hidden">
@@ -243,7 +251,12 @@
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Radial Score gauge -->
             <div class="lg:col-span-4 glass-card rounded-2xl p-6 border-white/10 flex flex-col items-center justify-between text-center min-h-[300px]">
-              <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Carbon Health Score</h4>
+              <div class="flex items-center justify-center space-x-1.5">
+                <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Carbon Health Score</h4>
+                <button onclick="openScoreInfoModal()" aria-label="Learn how carbon score is calculated" class="text-slate-400 hover:text-white transition focus:outline-none">
+                  <i data-lucide="info" class="w-4 h-4" aria-hidden="true"></i>
+                </button>
+              </div>
               
               <div class="relative w-44 h-44 flex items-center justify-center my-4" aria-label="Carbon health score meter" role="img">
                 <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
@@ -352,6 +365,41 @@
             </div>
           </div>
 
+          <!-- Personalized Action Insights Card -->
+          <div class="glass-card rounded-2xl p-6 border-white/10 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-2.5 h-full bg-eco-accent-cyan animate-pulse"></div>
+            <div class="flex items-center space-x-2 text-eco-accent-cyan mb-3">
+              <i data-lucide="zap" class="w-5 h-5 text-eco-accent-cyan" aria-hidden="true"></i>
+              <h4 class="text-sm font-bold uppercase tracking-wider font-display text-white">Personalized AI Action Insights</h4>
+            </div>
+            <div id="insights-loading" class="py-4 flex items-center justify-center hidden" aria-label="Analyzing emissions history for recommendations">
+              <span class="w-2.5 h-2.5 bg-eco-accent-cyan rounded-full animate-ping"></span>
+            </div>
+            <div id="insights-container" class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div class="md:col-span-8 space-y-2">
+                <h5 id="insight-title" class="text-md font-bold text-white">Optimize Your Household Energy</h5>
+                <p id="insight-desc" class="text-xs text-slate-300 leading-relaxed">
+                  Home electricity represents 45% of your carbon load. Setting your AC cooling to 24°C and turning off phantom energy devices cuts down on emissions.
+                </p>
+                <div class="flex items-center space-x-4 text-xxs font-bold text-eco-accent-mint pt-1">
+                  <span class="flex items-center">
+                    <i data-lucide="leaf" class="w-4 h-4 mr-1 text-eco-accent-green" aria-hidden="true"></i>
+                    Saves ~<span id="insight-saving">20</span> kg CO2 / month
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400">
+                    Difficulty: <span id="insight-difficulty">Easy</span>
+                  </span>
+                </div>
+              </div>
+              <div class="md:col-span-4 flex justify-end">
+                <button id="insight-action-btn" onclick="commitInsightAction()" class="w-full md:w-auto px-5 py-2.5 bg-eco-accent-cyan hover:bg-cyan-600 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg transition flex items-center justify-center space-x-1.5 focus:outline-none focus:ring-2 focus:ring-eco-accent-cyan">
+                  <i data-lucide="arrow-right-circle" class="w-4 h-4 fill-slate-950" aria-hidden="true"></i>
+                  <span>Join Target Challenge</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Daily habits ticking challenge -->
           <div class="glass-card rounded-2xl p-6 border-white/10">
             <h4 class="text-md font-bold text-white font-display mb-4 flex items-center space-x-2">
@@ -401,7 +449,7 @@
         </div>
 
         <!-- TAB CONTENT 2: ECO TWIN -->
-        <div id="tab-eco-twin" class="tab-pane hidden space-y-6">
+        <div id="tab-eco-twin" class="tab-pane hidden space-y-6" role="tabpanel" aria-labelledby="nav-eco-twin">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Tree SVG panel -->
             <div class="lg:col-span-5 glass-card rounded-2xl p-6 flex flex-col items-center justify-between border-white/10 relative overflow-hidden">
@@ -478,7 +526,7 @@
         </div>
 
         <!-- TAB CONTENT 3: CARBON MAP -->
-        <div id="tab-maps" class="tab-pane hidden space-y-6">
+        <div id="tab-maps" class="tab-pane hidden space-y-6" role="tabpanel" aria-labelledby="nav-maps">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             <!-- Sidebar routing -->
@@ -609,7 +657,7 @@
         </div>
 
         <!-- TAB CONTENT 4: CHALLENGES -->
-        <div id="tab-challenges" class="tab-pane hidden space-y-6">
+        <div id="tab-challenges" class="tab-pane hidden space-y-6" role="tabpanel" aria-labelledby="nav-challenges">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Challenge Cards panel -->
             <div class="lg:col-span-7 space-y-6">
@@ -647,6 +695,38 @@
                   <!-- Badges injected here -->
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 5: LOGS MANAGER -->
+        <div id="tab-history" class="tab-pane hidden space-y-6" role="tabpanel" aria-labelledby="nav-history">
+          <div class="glass-card rounded-2xl p-6 border-white/10 space-y-6">
+            <div class="flex justify-between items-center">
+              <div>
+                <h4 class="text-lg font-bold text-white font-display uppercase tracking-wide">Manage Carbon History</h4>
+                <p class="text-xs text-slate-400">View, analyze, or delete your previous daily footprint logs.</p>
+              </div>
+            </div>
+            
+            <div class="overflow-x-auto w-full border border-white/10 rounded-xl">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-white/5 border-b border-white/10 text-slate-400 font-semibold uppercase tracking-wider">
+                    <th class="p-3">Date</th>
+                    <th class="p-3">Score</th>
+                    <th class="p-3">Total CO2</th>
+                    <th class="p-3">Commute Mode</th>
+                    <th class="p-3">Distance</th>
+                    <th class="p-3">Energy (Source)</th>
+                    <th class="p-3">Diet</th>
+                    <th class="p-3 text-right font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="history-logs-tbody" class="divide-y divide-white/5 text-slate-200">
+                  <!-- Injected via app.js -->
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -814,6 +894,51 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. MODAL: SCORE EXPLANATION DIALOG -->
+    <div id="score-info-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="score-info-title">
+      <div class="w-full max-w-md glass-card rounded-2xl overflow-hidden shadow-2xl border-white/10 relative">
+        <button onclick="closeScoreInfoModal()" aria-label="Close dialog" class="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-eco-accent-green">
+          <i data-lucide="x" class="w-5 h-5" aria-hidden="true"></i>
+        </button>
+
+        <div class="p-6 border-b border-white/10 bg-white/5">
+          <h3 id="score-info-title" class="text-xl font-semibold font-display text-white font-semibold">How Carbon Score is Calculated</h3>
+          <p class="text-xs text-slate-400">Understanding your daily environmental standings.</p>
+        </div>
+
+        <div class="p-6 space-y-4 text-xs text-slate-300 leading-relaxed">
+          <p>
+            Your daily activities generate CO2 emissions, measured in kilograms (kg CO2). The score represents your efficiency in comparison to target benchmarks:
+          </p>
+          <div class="p-3 bg-white/5 border border-white/5 rounded-xl space-y-1.5">
+            <div class="flex justify-between text-eco-accent-mint font-bold">
+              <span>Score 100 (Eco Guardian)</span>
+              <span>&le; 2.0 kg CO2 / day</span>
+            </div>
+            <div class="flex justify-between text-eco-accent-yellow font-bold">
+              <span>Score 50 (Eco Steady)</span>
+              <span>16.0 kg CO2 / day</span>
+            </div>
+            <div class="flex justify-between text-eco-accent-red font-bold">
+              <span>Score 0 (Eco Critical)</span>
+              <span>&ge; 30.0 kg CO2 / day</span>
+            </div>
+          </div>
+          <p>
+            A linear formula interpolates your score between 2.0 kg and 30.0 kg. Any footprint above 30.0 kg results in a score of 0.
+          </p>
+          <p class="font-bold text-white uppercase tracking-wider text-[10px]">Daily Benchmarks:</p>
+          <ul class="list-disc list-inside space-y-1 pl-1">
+            <li><strong>Target daily budget:</strong> 6.0 kg CO2 (corresponds to a score of 85+)</li>
+            <li><strong>Global daily average:</strong> 15.0 kg CO2 (corresponds to a score of 53)</li>
+          </ul>
+          <p class="pt-2 border-t border-white/5 text-slate-400">
+            🌱 Action Tip: Try reducing travel distance, using solar energy, or swapping meals to vegetarian or vegan to boost your score!
+          </p>
         </div>
       </div>
     </div>

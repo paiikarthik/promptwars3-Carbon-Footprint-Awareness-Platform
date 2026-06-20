@@ -112,6 +112,45 @@ def test_challenges_endpoints():
     assert complete_resp.status_code == 200
     assert "test_user_99" in complete_resp.json()["completed_by"]
 
+def test_insights_endpoint():
+    # Fetch insights for test_user_99
+    response = client.get("/api/carbon/insights/test_user_99")
+    assert response.status_code == 200
+    data = response.json()
+    assert "highest_category" in data
+    assert "insight" in data
+    assert "breakdown" in data
+
+def test_delete_single_log():
+    # Log a temporary footprint
+    log_input = {
+        "commute_distance_km": 5.0,
+        "commute_mode": "walk_cycle",
+        "electricity_kwh": 3.0,
+        "home_energy_source": "solar",
+        "diet_preference": "vegan",
+        "shopping_purchases": 0,
+        "waste_recycled": True
+    }
+    log_response = client.post("/api/carbon/log/test_user_99/2026-06-18", json=log_input)
+    assert log_response.status_code == 200
+    
+    # Verify it exists
+    history_resp = client.get("/api/carbon/history/test_user_99")
+    assert history_resp.status_code == 200
+    dates = [l["date"] for l in history_resp.json()["logs"]]
+    assert "2026-06-18" in dates
+    
+    # Delete it
+    delete_resp = client.delete("/api/carbon/log/test_user_99/2026-06-18")
+    assert delete_resp.status_code == 200
+    
+    # Verify it is deleted
+    history_resp2 = client.get("/api/carbon/history/test_user_99")
+    assert history_resp2.status_code == 200
+    dates2 = [l["date"] for l in history_resp2.json()["logs"]]
+    assert "2026-06-18" not in dates2
+
 def test_delete_user_endpoint():
     # Verify user exists first
     response = client.get("/api/user/test_user_99")
