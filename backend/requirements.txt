@@ -2,6 +2,7 @@ fastapi
 uvicorn
 pydantic
 google-generativeai
+google-genai
 firebase-admin
 scikit-learn
 pandas

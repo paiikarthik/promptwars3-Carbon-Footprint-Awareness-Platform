@@ -152,9 +152,9 @@ def predict_next_month_emissions(historical_logs: list, user_profile: dict) -> d
     
     reason = "Expected baseline activity holds steady."
     if next_seasonal > current_seasonal:
-        reason = f"Increased emissions predicted due to seasonal heating/cooling changes as temperature shifts."
+        reason = "Increased emissions predicted due to seasonal heating/cooling changes as temperature shifts."
     elif next_seasonal < current_seasonal:
-        reason = f"Slightly lower emissions predicted due to milder seasonal weather requiring less air-conditioning or heating."
+        reason = "Slightly lower emissions predicted due to milder seasonal weather requiring less air-conditioning or heating."
     
     if difference > 15.0 and next_seasonal >= current_seasonal:
         reason = "Higher overall carbon footprint predicted. This is driven by upcoming seasonal weather factors and recent consumption patterns."

@@ -1,6 +1,6 @@
 import re
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List, Dict, Any
+from typing import Optional
 
 # Safe string validator to block basic script tags (XSS guard)
 def sanitize_string(v: str) -> str:

@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from main import app
 
@@ -138,7 +137,7 @@ def test_delete_single_log():
     # Verify it exists
     history_resp = client.get("/api/carbon/history/test_user_99")
     assert history_resp.status_code == 200
-    dates = [l["date"] for l in history_resp.json()["logs"]]
+    dates = [log["date"] for log in history_resp.json()["logs"]]
     assert "2026-06-18" in dates
     
     # Delete it
@@ -148,7 +147,7 @@ def test_delete_single_log():
     # Verify it is deleted
     history_resp2 = client.get("/api/carbon/history/test_user_99")
     assert history_resp2.status_code == 200
-    dates2 = [l["date"] for l in history_resp2.json()["logs"]]
+    dates2 = [log["date"] for log in history_resp2.json()["logs"]]
     assert "2026-06-18" not in dates2
 
 def test_delete_user_endpoint():

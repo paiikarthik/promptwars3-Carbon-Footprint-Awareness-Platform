@@ -25,7 +25,7 @@ EcoAI Guardian closes the gap between intention and action by creating an active
 
 ```mermaid
 graph TD
-    subgraph Frontend [React SPA - Vite]
+    subgraph Frontend [Vanilla JS SPA - Static HTML]
         UI[Dashboard / Circular Score]
         MapUI[Carbon Map & POIs]
         Buddy[EcoBuddy Chat Interface]
@@ -45,7 +45,6 @@ graph TD
         Gemini[Google Gemini API]
         MapsAPI[Google Maps / Places]
         Firestore[Firebase Firestore DB]
-        Auth[Firebase Auth]
     end
 
     UI -->|HTTP Requests| API
@@ -67,9 +66,9 @@ graph TD
 ---
 
 ## 5. Technology Stack
-* **Frontend**: React (Vite), Tailwind CSS, Lucide React (Icons), Recharts (Visualizations), Canvas-Confetti (Gamification UI).
+* **Frontend**: Vanilla HTML5, CSS3, & Modern JS (Chart.js, Tailwind CSS, Lucide Icons, Canvas-Confetti).
 * **Backend**: Python FastAPI, Uvicorn (ASGI server), Scikit-Learn (Predictive models), Pandas/Numpy (Data handling).
-* **Database & Auth**: Firebase Firestore and Firebase Authentication (Hybrid mode supports local JSON state if unconfigured).
+* **Database & Auth**: Firebase Firestore (Hybrid mode supports local JSON state if unconfigured).
 * **AI & Location Services**: Google Gemini API (`gemini-1.5-flash`), Google Maps JavaScript API, Directions API, and Places API.
 
 ---
@@ -88,10 +87,9 @@ graph TD
 
 ### Prerequisites
 * Python 3.9+ (Python 3.13 supported)
-* Node.js (v16+) and npm (for running the React UI client)
 
-### Backend Setup
-1. Open a terminal and navigate to the backend directory:
+### Launch Steps
+1. Navigate to the backend directory:
    ```bash
    cd backend
    ```
@@ -103,26 +101,11 @@ graph TD
    ```bash
    copy .env.example .env
    ```
-4. Run the FastAPI development server:
+4. Run the FastAPI dev server:
    ```bash
    python main.py
    ```
-   The API will be available at: `http://localhost:8000`
-
-### Frontend Setup
-1. Open a separate terminal and navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install Node packages:
-   ```bash
-   npm install
-   ```
-3. Launch the Vite React development server:
-   ```bash
-   npm run dev
-   ```
-   Open your browser and navigate to: `http://localhost:3000` (requests are automatically proxied to the backend on `localhost:8000`).
+5. Open your browser and navigate to: `http://localhost:8000` (the backend automatically hosts the frontend assets at the root).
 
 ---
 

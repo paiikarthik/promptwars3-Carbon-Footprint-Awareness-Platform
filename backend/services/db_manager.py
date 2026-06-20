@@ -399,10 +399,10 @@ def get_leaderboard() -> list:
             logs_list = [doc.to_dict() for doc in logs_docs]
             
             for uid, u in users.items():
-                u_logs = [l for l in logs_list if l.get("userId") == uid]
+                u_logs = [log for log in logs_list if log.get("userId") == uid]
                 saved_co2 = 0.0
                 if u_logs:
-                    avg_log_emissions = sum(l.get("total_emissions", 0.0) for l in u_logs) / len(u_logs)
+                    avg_log_emissions = sum(log.get("total_emissions", 0.0) for log in u_logs) / len(u_logs)
                     saved_co2 = max(0.0, (15.0 - avg_log_emissions) * len(u_logs))
                 else:
                     saved_co2 = (u.get("points", 0) * 0.1)
@@ -424,7 +424,7 @@ def get_leaderboard() -> list:
             logs = [log for log in local_db["carbon_logs"].values() if log["userId"] == uid]
             saved_co2 = 0.0
             if logs:
-                avg_log_emissions = sum(l["total_emissions"] for l in logs) / len(logs)
+                avg_log_emissions = sum(log["total_emissions"] for log in logs) / len(logs)
                 saved_co2 = max(0.0, (15.0 - avg_log_emissions) * len(logs))
             else:
                 saved_co2 = (u.get("points", 0) * 0.1)

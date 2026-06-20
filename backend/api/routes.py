@@ -26,12 +26,12 @@ async def get_user_profile(user_id: str):
     
     if logs:
         # Average distance excludes walk/cycle (0 km) to prevent skews on vehicle entries
-        vehicle_logs = [l for l in logs if l["inputs"].get("commute_mode") != "walk_cycle"]
+        vehicle_logs = [log for log in logs if log["inputs"].get("commute_mode") != "walk_cycle"]
         if vehicle_logs:
-            avg_dist = sum(l["inputs"].get("commute_distance_km", 15.0) for l in vehicle_logs) / len(vehicle_logs)
+            avg_dist = sum(log["inputs"].get("commute_distance_km", 15.0) for log in vehicle_logs) / len(vehicle_logs)
         else:
             avg_dist = 0.0
-        avg_elec = sum(l["inputs"].get("electricity_kwh", 8.0) for l in logs) / len(logs)
+        avg_elec = sum(log["inputs"].get("electricity_kwh", 8.0) for log in logs) / len(logs)
         
     user["historical_averages"] = {
         "commute_distance_km": round(avg_dist, 1),
@@ -172,8 +172,8 @@ async def chat_with_ecobuddy(req: ChatRequestSchema):
         avg_score = 70
         avg_daily_co2 = 12.0
         if logs:
-            avg_score = int(sum(l["carbon_score"] for l in logs) / len(logs))
-            avg_daily_co2 = sum(l["total_emissions"] for l in logs) / len(logs)
+            avg_score = int(sum(log["carbon_score"] for log in logs) / len(logs))
+            avg_daily_co2 = sum(log["total_emissions"] for log in logs) / len(logs)
             
         user_context = {
             "displayName": user.get("displayName", "Eco Warrior"),
@@ -233,11 +233,11 @@ async def delete_carbon_log_route(user_id: str, date_str: str):
     twin = db_manager.get_eco_twin(user_id)
     if twin:
         if logs:
-            avg_trans = sum(l["category_breakdown"]["transportation"] for l in logs) / len(logs)
-            avg_energy = sum(l["category_breakdown"]["energy"] for l in logs) / len(logs)
-            avg_food = sum(l["category_breakdown"]["food"] for l in logs) / len(logs)
-            avg_life = sum(l["category_breakdown"]["lifestyle"] for l in logs) / len(logs)
-            avg_score = sum(l["carbon_score"] for l in logs) / len(logs)
+            avg_trans = sum(log["category_breakdown"]["transportation"] for log in logs) / len(logs)
+            avg_energy = sum(log["category_breakdown"]["energy"] for log in logs) / len(logs)
+            avg_food = sum(log["category_breakdown"]["food"] for log in logs) / len(logs)
+            avg_life = sum(log["category_breakdown"]["lifestyle"] for log in logs) / len(logs)
+            avg_score = sum(log["carbon_score"] for log in logs) / len(logs)
             
             status = twin["current_status"]
             status["transportation_impact"] = "high" if avg_trans > 4.0 else ("medium" if avg_trans > 1.5 else "low")

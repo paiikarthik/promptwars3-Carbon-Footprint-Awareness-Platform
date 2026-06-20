@@ -1,6 +1,5 @@
 import os
 from google import genai
-from datetime import datetime
 
 # Initialize Gemini if API key exists
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
