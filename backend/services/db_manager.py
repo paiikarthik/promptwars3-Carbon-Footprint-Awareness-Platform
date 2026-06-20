@@ -32,7 +32,26 @@ if FIREBASE_CREDENTIALS:
         print(f"Failed to initialize Firebase, falling back to local JSON database. Error: {e}")
 
 # Local JSON Database Fallback Path
-LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "local_db.json")
+LOCAL_DB_PATH = os.getenv(
+    "LOCAL_DB_PATH",
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "local_db.json"),
+)
+
+def build_default_eco_twin() -> dict:
+    return {
+        "current_status": {
+            "transportation_impact": "medium",
+            "energy_impact": "medium",
+            "food_impact": "medium",
+            "lifestyle_impact": "medium",
+            "overall_health_score": 50
+        },
+        "roadmap": [
+            {"week": 1, "milestone": "Green Commute", "action": "Walk or cycle for short journeys", "target_saving": 5.0, "completed": False},
+            {"week": 2, "milestone": "AC Saver", "action": "Set AC cooling to 24 degrees C", "target_saving": 6.5, "completed": False},
+            {"week": 3, "milestone": "Veggie Switch", "action": "Swap meat for vegetables in 3 dinners", "target_saving": 4.0, "completed": False}
+        ]
+    }
 
 def load_local_db() -> dict:
     with file_lock:
@@ -282,20 +301,7 @@ def get_eco_twin(user_id: str) -> dict:
         local_db = load_local_db()
         if user_id not in local_db["eco_twin"]:
             # Auto-generate baseline twin
-            local_db["eco_twin"][user_id] = {
-                "current_status": {
-                    "transportation_impact": "medium",
-                    "energy_impact": "medium",
-                    "food_impact": "medium",
-                    "lifestyle_impact": "medium",
-                    "overall_health_score": 50
-                },
-                "roadmap": [
-                    {"week": 1, "milestone": "Green Commute", "action": "Walk or cycle for short journeys", "target_saving": 5.0, "completed": False},
-                    {"week": 2, "milestone": "AC Saver", "action": "Set AC cooling to 24 degrees C", "target_saving": 6.5, "completed": False},
-                    {"week": 3, "milestone": "Veggie Switch", "action": "Swap meat for vegetables in 3 dinners", "target_saving": 4.0, "completed": False}
-                ]
-            }
+            local_db["eco_twin"][user_id] = build_default_eco_twin()
             save_local_db(local_db)
         return local_db["eco_twin"].get(user_id)
 
@@ -309,6 +315,7 @@ def update_eco_twin(user_id: str, updates: dict) -> dict:
         if user_id not in local_db["eco_twin"]:
             get_eco_twin(user_id) # initializes
             local_db = load_local_db()
+            local_db["eco_twin"].setdefault(user_id, build_default_eco_twin())
             
         for k, v in updates.items():
             if isinstance(v, dict) and k in local_db["eco_twin"][user_id]:

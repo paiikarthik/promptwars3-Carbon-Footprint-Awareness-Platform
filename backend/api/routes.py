@@ -215,8 +215,8 @@ async def chat_with_ecobuddy(req: ChatRequestSchema):
             "carbon_score": avg_score,
             "current_daily_co2": round(avg_daily_co2, 2),
             "commute_distance_km": user.get("preferences", {}).get("commute_distance_km", 15.0),
-            "commute_mode": user.get("preferences", {}).get("commute_mode", "petrol_bike"),
-            "diet_preference": user.get("preferences", {}).get("diet_preference", "balanced")
+            "commute_mode": user.get("preferences", {}).get("commute_mode", DEFAULT_COMMUTE_MODE),
+            "diet_preference": user.get("preferences", {}).get("diet_preference", DEFAULT_DIET)
         }
         
     reply = ecobuddy.ask_ecobuddy(req.query, user_context)
