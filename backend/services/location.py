@@ -1,8 +1,10 @@
 import os
 import httpx
 from math import radians, cos, sin, asin, sqrt
+from carbon_engine.constants import DEFAULT_COMMUTE_MODE, TRANSPORT_EMISSION_FACTORS
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+HTTP_TIMEOUT_SECONDS = 10.0
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
@@ -20,7 +22,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     r = 6371 # Radius of earth in kilometers.
     return c * r
 
-def analyze_route_emissions(origin: str, destination: str, current_mode: str = "petrol_bike") -> dict:
+def analyze_route_emissions(origin: str, destination: str, current_mode: str = DEFAULT_COMMUTE_MODE) -> dict:
     """
     Compares carbon footprint of different transport modes for a specific route.
     Queries Google Directions API if key is present, otherwise falls back to a simulated response.
@@ -30,8 +32,11 @@ def analyze_route_emissions(origin: str, destination: str, current_mode: str = "
     
     if GOOGLE_MAPS_API_KEY:
         try:
-            url = f"https://maps.googleapis.com/maps/api/directions/json?origin={origin}&destination={destination}&key={GOOGLE_MAPS_API_KEY}"
-            response = httpx.get(url)
+            response = httpx.get(
+                "https://maps.googleapis.com/maps/api/directions/json",
+                params={"origin": origin, "destination": destination, "key": GOOGLE_MAPS_API_KEY},
+                timeout=HTTP_TIMEOUT_SECONDS,
+            )
             if response.status_code == 200:
                 data = response.json()
                 if data.get("routes"):
@@ -41,17 +46,8 @@ def analyze_route_emissions(origin: str, destination: str, current_mode: str = "
         except Exception as e:
             print(f"Error querying Google Directions API: {e}")
 
-    # Transport emission factors (kg CO2 per km)
-    factors = {
-        "petrol_bike": 0.12,
-        "diesel_car": 0.18,
-        "ev": 0.05,
-        "public_transit": 0.04,
-        "walk_cycle": 0.0
-    }
-
     modes_comparison = []
-    for mode, factor in factors.items():
+    for mode, factor in TRANSPORT_EMISSION_FACTORS.items():
         co2_emissions = distance_km * factor
         # Speed estimates for time
         speed_factors = {
@@ -69,11 +65,21 @@ def analyze_route_emissions(origin: str, destination: str, current_mode: str = "
             "name": mode.replace("_", " ").title(),
             "emissions_kg": round(co2_emissions, 2),
             "duration_mins": int(mode_duration),
-            "co2_saved_vs_current": round((distance_km * factors.get(current_mode, 0.12)) - co2_emissions, 2)
+            "co2_saved_vs_current": round(
+                (distance_km * TRANSPORT_EMISSION_FACTORS.get(
+                    current_mode,
+                    TRANSPORT_EMISSION_FACTORS[DEFAULT_COMMUTE_MODE],
+                )) - co2_emissions,
+                2,
+            )
         })
 
     # Find the eco recommendation (minimum non-zero emission, or public transit)
-    savings = (distance_km * factors.get(current_mode, 0.12)) - (distance_km * factors["public_transit"])
+    current_emissions = distance_km * TRANSPORT_EMISSION_FACTORS.get(
+        current_mode,
+        TRANSPORT_EMISSION_FACTORS[DEFAULT_COMMUTE_MODE],
+    )
+    savings = current_emissions - (distance_km * TRANSPORT_EMISSION_FACTORS["public_transit"])
     monthly_savings = savings * 2 * 20 # 20 round-trip commute days
     
     recommendation = f"Using public transport on this route instead of your current mode can reduce approximately {round(monthly_savings, 1)} kg CO2 per month."
@@ -104,8 +110,16 @@ def find_nearby_sustainable_places(latitude: float, longitude: float, place_type
     
     if GOOGLE_MAPS_API_KEY:
         try:
-            url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={latitude},{longitude}&radius=5000&keyword={search_query}&key={GOOGLE_MAPS_API_KEY}"
-            response = httpx.get(url)
+            response = httpx.get(
+                "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+                params={
+                    "location": f"{latitude},{longitude}",
+                    "radius": 5000,
+                    "keyword": search_query,
+                    "key": GOOGLE_MAPS_API_KEY,
+                },
+                timeout=HTTP_TIMEOUT_SECONDS,
+            )
             if response.status_code == 200:
                 data = response.json()
                 results = []

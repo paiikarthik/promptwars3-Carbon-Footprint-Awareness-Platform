@@ -2,6 +2,13 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from datetime import datetime, timedelta
+from carbon_engine.constants import (
+    DEFAULT_COMMUTE_MODE,
+    DEFAULT_DIET,
+    DEFAULT_REGION,
+    FOOD_EMISSION_FACTORS,
+    TRANSPORT_EMISSION_FACTORS,
+)
 
 def get_seasonal_factor(month: int, region: str = "temperate") -> float:
     """
@@ -25,27 +32,28 @@ def get_seasonal_factor(month: int, region: str = "temperate") -> float:
         }
     return seasonal_factors.get(month, 1.0)
 
-def generate_synthetic_history(user_base_daily: float, days: int = 60, region: str = "temperate") -> list:
+def generate_synthetic_history(user_base_daily: float, days: int = 60, region: str = DEFAULT_REGION) -> list:
     """
     Generates realistic historical carbon log sequence for training.
     """
     history = []
     base_date = datetime.now() - timedelta(days=days)
+    rng = np.random.default_rng(42)
     
     for i in range(days):
         current_date = base_date + timedelta(days=i)
         month = current_date.month
         # Add random noise and seasonal factor
         seasonal = get_seasonal_factor(month, region)
-        noise = np.random.normal(0, 1.5) # std deviation of 1.5 kg
+        noise = rng.normal(0, 1.5) # std deviation of 1.5 kg
         daily_val = max(1.5, (user_base_daily * seasonal) + noise)
         
         # Add weekly travel pattern (higher emissions on weekdays, lower on weekends)
         weekday = current_date.weekday()
         if weekday < 5:  # Weekday
-            daily_val += np.random.uniform(0.5, 2.0)
+            daily_val += rng.uniform(0.5, 2.0)
         else:            # Weekend
-            daily_val -= np.random.uniform(0.5, 1.5)
+            daily_val -= rng.uniform(0.5, 1.5)
             
         history.append({
             "date": current_date.strftime("%Y-%m-%d"),
@@ -62,9 +70,9 @@ def predict_next_month_emissions(historical_logs: list, user_profile: dict) -> d
         historical_logs: List of dicts containing {"date": "YYYY-MM-DD", "total_emissions": float}
         user_profile: Dict containing preferences (region, default travel distance, etc.)
     """
-    region = user_profile.get("region", "temperate")
+    region = user_profile.get("region", DEFAULT_REGION)
     base_commute = user_profile.get("commute_distance_km", 15.0)
-    base_mode = user_profile.get("commute_mode", "petrol_bike")
+    base_mode = user_profile.get("commute_mode", DEFAULT_COMMUTE_MODE)
     
     # 1. Prepare and clean data
     logs_df = pd.DataFrame(historical_logs)
@@ -73,13 +81,14 @@ def predict_next_month_emissions(historical_logs: list, user_profile: dict) -> d
     if logs_df.empty or len(logs_df) < 15:
         # Determine average base daily footprint from calculator
         # Simple estimate based on lifestyle
-        diet = user_profile.get("diet_preference", "balanced")
-        diet_baselines = {"meat_heavy": 8.0, "balanced": 5.0, "vegetarian": 2.5, "vegan": 1.5}
-        base_food = diet_baselines.get(diet, 5.0)
+        diet = user_profile.get("diet_preference", DEFAULT_DIET)
+        base_food = FOOD_EMISSION_FACTORS.get(diet, FOOD_EMISSION_FACTORS[DEFAULT_DIET])
         
         # Est transport base
-        modes = {"petrol_bike": 0.12, "diesel_car": 0.18, "ev": 0.05, "public_transit": 0.04, "walk_cycle": 0.0}
-        base_transport = base_commute * modes.get(base_mode, 0.12)
+        base_transport = base_commute * TRANSPORT_EMISSION_FACTORS.get(
+            base_mode,
+            TRANSPORT_EMISSION_FACTORS[DEFAULT_COMMUTE_MODE],
+        )
         
         calculated_base = base_food + base_transport + 3.0  # (estimated average electricity + lifestyle)
         synthetic_logs = generate_synthetic_history(calculated_base, days=60, region=region)

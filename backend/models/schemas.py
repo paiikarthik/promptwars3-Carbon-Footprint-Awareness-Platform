@@ -1,12 +1,19 @@
 import re
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
+from carbon_engine.constants import COMMUTE_MODES, DIET_PREFERENCES, ENERGY_SOURCES
 
 # Safe string validator to block basic script tags (XSS guard)
 def sanitize_string(v: str) -> str:
     if re.search(r"<script.*?>.*?</script>|javascript:|onload=", v, re.IGNORECASE):
         raise ValueError("Potential script injection detected.")
     return v
+
+def validate_choice(value: str, field_name: str, valid_choices: tuple[str, ...]) -> str:
+    sanitize_string(value)
+    if value not in valid_choices:
+        raise ValueError(f"Invalid {field_name}. Must be one of {list(valid_choices)}")
+    return value
 
 class UserPreferencesSchema(BaseModel):
     commute_mode: str = "walk_cycle"
@@ -17,29 +24,17 @@ class UserPreferencesSchema(BaseModel):
     @field_validator("commute_mode")
     @classmethod
     def validate_commute_mode(cls, v: str) -> str:
-        sanitize_string(v)
-        valid = ["petrol_bike", "diesel_car", "ev", "public_transit", "walk_cycle"]
-        if v not in valid:
-            raise ValueError(f"Invalid commute_mode. Must be one of {valid}")
-        return v
+        return validate_choice(v, "commute_mode", COMMUTE_MODES)
 
     @field_validator("diet_preference")
     @classmethod
     def validate_diet(cls, v: str) -> str:
-        sanitize_string(v)
-        valid = ["meat_heavy", "balanced", "vegetarian", "vegan"]
-        if v not in valid:
-            raise ValueError(f"Invalid diet_preference. Must be one of {valid}")
-        return v
+        return validate_choice(v, "diet_preference", DIET_PREFERENCES)
 
     @field_validator("home_energy_source")
     @classmethod
     def validate_energy(cls, v: str) -> str:
-        sanitize_string(v)
-        valid = ["coal_grid", "mixed_grid", "solar"]
-        if v not in valid:
-            raise ValueError(f"Invalid home_energy_source. Must be one of {valid}")
-        return v
+        return validate_choice(v, "home_energy_source", ENERGY_SOURCES)
 
 class UserUpdateSchema(BaseModel):
     displayName: Optional[str] = Field(None, max_length=50)
@@ -70,29 +65,17 @@ class CarbonLogInputSchema(BaseModel):
     @field_validator("commute_mode")
     @classmethod
     def validate_commute_mode(cls, v: str) -> str:
-        sanitize_string(v)
-        valid = ["petrol_bike", "diesel_car", "ev", "public_transit", "walk_cycle"]
-        if v not in valid:
-            raise ValueError(f"Invalid commute_mode. Must be one of {valid}")
-        return v
+        return validate_choice(v, "commute_mode", COMMUTE_MODES)
 
     @field_validator("diet_preference")
     @classmethod
     def validate_diet(cls, v: str) -> str:
-        sanitize_string(v)
-        valid = ["meat_heavy", "balanced", "vegetarian", "vegan"]
-        if v not in valid:
-            raise ValueError(f"Invalid diet_preference. Must be one of {valid}")
-        return v
+        return validate_choice(v, "diet_preference", DIET_PREFERENCES)
 
     @field_validator("home_energy_source")
     @classmethod
     def validate_energy(cls, v: str) -> str:
-        sanitize_string(v)
-        valid = ["coal_grid", "mixed_grid", "solar"]
-        if v not in valid:
-            raise ValueError(f"Invalid home_energy_source. Must be one of {valid}")
-        return v
+        return validate_choice(v, "home_energy_source", ENERGY_SOURCES)
 
 class RouteAnalyzeRequest(BaseModel):
     origin: str = Field(..., max_length=100)
@@ -108,11 +91,7 @@ class RouteAnalyzeRequest(BaseModel):
     @field_validator("current_mode")
     @classmethod
     def validate_commute_mode(cls, v: str) -> str:
-        sanitize_string(v)
-        valid = ["petrol_bike", "diesel_car", "ev", "public_transit", "walk_cycle"]
-        if v not in valid:
-            raise ValueError(f"Invalid current_mode. Must be one of {valid}")
-        return v
+        return validate_choice(v, "current_mode", COMMUTE_MODES)
 
 class ChatRequestSchema(BaseModel):
     query: str = Field(..., max_length=500)

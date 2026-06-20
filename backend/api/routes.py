@@ -7,10 +7,59 @@ from models.schemas import (
 )
 from services import db_manager, location
 from carbon_engine import calculator, predictor
+from carbon_engine.constants import (
+    DEFAULT_COMMUTE_MODE,
+    DEFAULT_DIET,
+    DEFAULT_ENERGY_SOURCE,
+    DEFAULT_REGION,
+    ENERGY_EMISSION_FACTORS,
+    FOOD_EMISSION_FACTORS,
+    IMPACT_THRESHOLDS,
+    TRANSPORT_EMISSION_FACTORS,
+)
 from ai_engine import ecobuddy
 from datetime import datetime
 
 router = APIRouter()
+CATEGORIES = ("transportation", "energy", "food", "lifestyle")
+
+def impact_level(category: str, value: float) -> str:
+    medium_threshold, high_threshold = IMPACT_THRESHOLDS[category]
+    if value > high_threshold:
+        return "high"
+    if value > medium_threshold:
+        return "medium"
+    return "low"
+
+def build_user_profile(user: dict) -> dict:
+    preferences = user.get("preferences", {})
+    return {
+        "region": user.get("region", DEFAULT_REGION),
+        "diet_preference": preferences.get("diet_preference", DEFAULT_DIET),
+        "commute_distance_km": preferences.get("commute_distance_km", 15.0),
+        "commute_mode": preferences.get("commute_mode", DEFAULT_COMMUTE_MODE),
+    }
+
+def average_category_breakdown(logs: list[dict]) -> dict[str, float]:
+    averages = dict.fromkeys(CATEGORIES, 0.0)
+    if not logs:
+        return averages
+
+    for log in logs:
+        breakdown = log.get("category_breakdown", {})
+        for category in CATEGORIES:
+            averages[category] += breakdown.get(category, 0.0)
+
+    return {
+        category: round(total / len(logs), 2)
+        for category, total in averages.items()
+    }
+
+def update_twin_status(twin: dict, breakdown: dict[str, float], score: int) -> None:
+    status = twin["current_status"]
+    for category, value in breakdown.items():
+        status[f"{category}_impact"] = impact_level(category, value)
+    status["overall_health_score"] = score
 
 @router.get("/user/{user_id}")
 async def get_user_profile(user_id: str):
@@ -87,12 +136,7 @@ async def log_carbon_emissions(user_id: str, date_str: str, inputs: CarbonLogInp
     # 1. Update the Eco Digital Twin
     twin = db_manager.get_eco_twin(user_id)
     if twin:
-        status = twin["current_status"]
-        status["transportation_impact"] = "high" if result["category_breakdown"]["transportation"] > 4.0 else ("medium" if result["category_breakdown"]["transportation"] > 1.5 else "low")
-        status["energy_impact"] = "high" if result["category_breakdown"]["energy"] > 6.0 else ("medium" if result["category_breakdown"]["energy"] > 2.5 else "low")
-        status["food_impact"] = "high" if result["category_breakdown"]["food"] > 5.0 else ("medium" if result["category_breakdown"]["food"] > 2.0 else "low")
-        status["lifestyle_impact"] = "high" if result["category_breakdown"]["lifestyle"] > 3.0 else ("medium" if result["category_breakdown"]["lifestyle"] > 1.0 else "low")
-        status["overall_health_score"] = result["carbon_score"]
+        update_twin_status(twin, result["category_breakdown"], result["carbon_score"])
         
         for milestone in twin.get("roadmap", []):
             if milestone["week"] == 1 and inputs.commute_mode in ["public_transit", "walk_cycle"] and not milestone["completed"]:
@@ -106,12 +150,7 @@ async def log_carbon_emissions(user_id: str, date_str: str, inputs: CarbonLogInp
         user = db_manager.get_user(user_id)
         if user:
             updated_logs = db_manager.get_carbon_logs(user_id)
-            user_profile = {
-                "region": user.get("region", "temperate"),
-                "diet_preference": user.get("preferences", {}).get("diet_preference", "balanced"),
-                "commute_distance_km": user.get("preferences", {}).get("commute_distance_km", 15.0),
-                "commute_mode": user.get("preferences", {}).get("commute_mode", "petrol_bike")
-            }
+            user_profile = build_user_profile(user)
             prediction = predictor.predict_next_month_emissions(updated_logs, user_profile)
             db_manager.update_user(user_id, {"cached_predictions": prediction})
     except Exception as e:
@@ -133,12 +172,7 @@ async def get_carbon_prediction(user_id: str):
         
     # Compute on the fly if cache is not built yet (e.g. new session)
     logs = db_manager.get_carbon_logs(user_id)
-    user_profile = {
-        "region": user.get("region", "temperate"),
-        "diet_preference": user.get("preferences", {}).get("diet_preference", "balanced"),
-        "commute_distance_km": user.get("preferences", {}).get("commute_distance_km", 15.0),
-        "commute_mode": user.get("preferences", {}).get("commute_mode", "petrol_bike")
-    }
+    user_profile = build_user_profile(user)
     
     prediction = predictor.predict_next_month_emissions(logs, user_profile)
     db_manager.update_user(user_id, {"cached_predictions": prediction})
@@ -233,24 +267,12 @@ async def delete_carbon_log_route(user_id: str, date_str: str):
     twin = db_manager.get_eco_twin(user_id)
     if twin:
         if logs:
-            avg_trans = sum(log["category_breakdown"]["transportation"] for log in logs) / len(logs)
-            avg_energy = sum(log["category_breakdown"]["energy"] for log in logs) / len(logs)
-            avg_food = sum(log["category_breakdown"]["food"] for log in logs) / len(logs)
-            avg_life = sum(log["category_breakdown"]["lifestyle"] for log in logs) / len(logs)
             avg_score = sum(log["carbon_score"] for log in logs) / len(logs)
-            
-            status = twin["current_status"]
-            status["transportation_impact"] = "high" if avg_trans > 4.0 else ("medium" if avg_trans > 1.5 else "low")
-            status["energy_impact"] = "high" if avg_energy > 6.0 else ("medium" if avg_energy > 2.5 else "low")
-            status["food_impact"] = "high" if avg_food > 5.0 else ("medium" if avg_food > 2.0 else "low")
-            status["lifestyle_impact"] = "high" if avg_life > 3.0 else ("medium" if avg_life > 1.0 else "low")
-            status["overall_health_score"] = int(avg_score)
+            update_twin_status(twin, average_category_breakdown(logs), int(avg_score))
         else:
             status = twin["current_status"]
-            status["transportation_impact"] = "medium"
-            status["energy_impact"] = "medium"
-            status["food_impact"] = "medium"
-            status["lifestyle_impact"] = "medium"
+            for category in CATEGORIES:
+                status[f"{category}_impact"] = "medium"
             status["overall_health_score"] = 50
             
         db_manager.update_eco_twin(user_id, twin)
@@ -264,27 +286,28 @@ async def get_personalized_insights(user_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
         
-    avg_emissions = {"transportation": 0.0, "energy": 0.0, "food": 0.0, "lifestyle": 0.0}
+    avg_emissions = dict.fromkeys(CATEGORIES, 0.0)
     total_avg = 0.0
     
     if logs:
-        for log in logs:
-            breakdown = log.get("category_breakdown", {})
-            for cat in avg_emissions:
-                avg_emissions[cat] += breakdown.get(cat, 0.0)
-        num_logs = len(logs)
-        for cat in avg_emissions:
-            avg_emissions[cat] = round(avg_emissions[cat] / num_logs, 2)
-            total_avg += avg_emissions[cat]
+        avg_emissions = average_category_breakdown(logs)
+        total_avg = sum(avg_emissions.values())
     else:
         pref = user.get("preferences", {})
-        food_baselines = {"meat_heavy": 8.0, "balanced": 5.0, "vegetarian": 2.5, "vegan": 1.5}
-        avg_emissions["food"] = food_baselines.get(pref.get("diet_preference", "balanced"), 5.0)
+        avg_emissions["food"] = FOOD_EMISSION_FACTORS.get(
+            pref.get("diet_preference", DEFAULT_DIET),
+            FOOD_EMISSION_FACTORS[DEFAULT_DIET],
+        )
         
-        modes = {"petrol_bike": 0.12, "diesel_car": 0.18, "ev": 0.05, "public_transit": 0.04, "walk_cycle": 0.0}
-        avg_emissions["transportation"] = pref.get("commute_distance_km", 15.0) * modes.get(pref.get("commute_mode", "petrol_bike"), 0.12)
+        avg_emissions["transportation"] = pref.get("commute_distance_km", 15.0) * TRANSPORT_EMISSION_FACTORS.get(
+            pref.get("commute_mode", DEFAULT_COMMUTE_MODE),
+            TRANSPORT_EMISSION_FACTORS[DEFAULT_COMMUTE_MODE],
+        )
         
-        avg_emissions["energy"] = 8.0 * (0.85 if pref.get("home_energy_source") == "coal_grid" else (0.05 if pref.get("home_energy_source") == "solar" else 0.45))
+        avg_emissions["energy"] = 8.0 * ENERGY_EMISSION_FACTORS.get(
+            pref.get("home_energy_source", DEFAULT_ENERGY_SOURCE),
+            ENERGY_EMISSION_FACTORS[DEFAULT_ENERGY_SOURCE],
+        )
         avg_emissions["lifestyle"] = 1.0
         total_avg = sum(avg_emissions.values())
 
