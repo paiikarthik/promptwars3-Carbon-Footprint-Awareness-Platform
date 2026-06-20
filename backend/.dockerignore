@@ -3,8 +3,11 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+.ruff_cache/
 local_db.json
 .env
+firebase-key.json
+*.log
 .git/
 .gitignore
 venv/

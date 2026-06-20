@@ -15,5 +15,15 @@
 
 # Python pycache:
 __pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Local runtime state and secrets:
+.env
+*.log
+local_db.json
+firebase-key.json
+
 # Ignored by the build system
 /setup.cfg

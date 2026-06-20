@@ -4,11 +4,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from pathlib import Path
 from api.routes import router as api_router
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+def get_cors_origins() -> list[str]:
+    origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000")
+    return [origin.strip() for origin in origins.split(",") if origin.strip()]
 
 app = FastAPI(
     title="EcoAI Guardian API",
@@ -19,7 +24,7 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,13 +34,13 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api")
 
 # Mount Static frontend assets
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-os.makedirs(static_dir, exist_ok=True)
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+static_dir = Path(__file__).resolve().parent / "static"
+static_dir.mkdir(exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 @app.get("/")
 async def root():
-    return FileResponse(os.path.join(static_dir, "index.html"))
+    return FileResponse(static_dir / "index.html")
 
 @app.get("/api/health")
 async def health():
