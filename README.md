@@ -23,7 +23,43 @@ EcoAI Guardian closes the gap between intention and action by creating an active
 
 ---
 
-## 4. System Architecture
+## 4. How It Works (Core Logic & Data Flow)
+
+### 📊 Carbon Calculation & Scoring
+The platform calculates daily greenhouse gas emissions in kilograms of CO2 ($kg\ CO_2$) using specific activity coefficients:
+* **Transportation**: Petrol Bike ($0.12/km$), Diesel Car ($0.18/km$), EV ($0.05/km$), Public Transit ($0.04/km$), Walk/Cycle ($0.00/km$).
+* **Home Energy**: Coal Grid ($0.85/kWh$), Mixed Grid ($0.45/kWh$), Solar ($0.05/kWh$).
+* **Diet**: Meat Heavy ($8.0/day$), Balanced ($5.0/day$), Vegetarian ($2.5/day$), Vegan ($1.5/day$).
+* **Lifestyle & Waste**: Purchases ($2.5/item$), Waste Landfilled ($1.5/day$), Waste Recycled ($0.2/day$).
+
+The **Carbon Score** is computed out of 100:
+* A score of **100** represents clean living ($\le 2.0\ kg\ CO_2/day$).
+* A score of **0** represents critical emissions ($\ge 30.0\ kg\ CO_2/day$).
+* Values in between are interpolated linearly:
+  $$\text{Score} = 100 - \left( \frac{\text{Emissions} - 2.0}{30.0 - 2.0} \right) \times 100$$
+
+### 🔮 Machine Learning Predictions
+To forecast the user's carbon footprint for the next 30 days:
+1. **Feature Engineering**: A `scikit-learn` `LinearRegression` model is trained on historical logs. Features include:
+   * `day_index`: Tracks the overall long-term trend.
+   * `day_of_week`: Captures weekly fluctuations (e.g., commute spikes on weekdays).
+   * `seasonal_factor`: A localized sine-wave temperature modifier (heating/cooling loads).
+2. **Cold-Start Bootstrapping**: If a new user has fewer than 15 logs, the engine generates synthetic historical logs using their default preferences and normal noise to seed the ML model.
+
+### 💬 Contextual AI Coaching (EcoBuddy)
+When you chat with EcoBuddy:
+1. The backend fetches the user's latest Firestore profile and historical averages.
+2. It constructs a rich context payload containing the user's name, city, current carbon score, daily average emissions, commute mode, and diet preference.
+3. This payload, along with the user's question, is wrapped in a system prompt defining EcoBuddy's persona as an encouraging, metrics-driven advisor.
+4. The prompt is sent to `gemini-1.5-flash` using the `google-genai` SDK to produce clean, formatted Markdown advice complete with emojis, difficulty ratings, and estimated $kg$ savings.
+
+### 🗺️ Geolocation & Routes
+* **Directions API**: Calculates route distances and compares transit options (e.g., driving vs. public transit) to show potential savings.
+* **Places API**: Conducts localized radial searches (within 5 km) using keywords like `"electric vehicle charging station"`, `"recycling center"`, or `"organic food store"`.
+
+---
+
+## 5. System Architecture
 
 ```mermaid
 graph TD
@@ -67,7 +103,7 @@ graph TD
 
 ---
 
-## 5. Technology Stack
+## 6. Technology Stack
 * **Frontend**: Vanilla HTML5, CSS3, & Modern JS (Chart.js, Tailwind CSS, Lucide Icons, Canvas-Confetti).
 * **Backend**: Python FastAPI, Uvicorn (ASGI server), Scikit-Learn (Predictive models), Pandas/Numpy (Data handling).
 * **Database & Auth**: Firebase Firestore (Hybrid mode supports local JSON state if unconfigured).
@@ -75,7 +111,7 @@ graph TD
 
 ---
 
-## 6. Features
+## 7. Features
 1. **Personal Carbon Calculator**: Logs daily travel (km/mode), energy (kWh/source), meals (diet preferences), and shopping to yield a **Carbon Score out of 100**.
 2. **EcoBuddy Chatbot**: Context-aware Gemini sustainability advisor with simulated conversational fallback.
 3. **Real-Time Carbon Map**: Visualizes pollution zones, green parks, and sustainable POIs.
@@ -85,7 +121,7 @@ graph TD
 
 ---
 
-## 7. Installation & Setup
+## 8. Installation & Setup
 
 ### Prerequisites
 * Python 3.9+ (Python 3.13 supported)
@@ -111,7 +147,7 @@ graph TD
 
 ---
 
-## 8. Quality Checks
+## 9. Quality Checks
 
 Run these before submission:
 
@@ -127,7 +163,7 @@ Current verified status:
 
 ---
 
-## 9. API Setup Instructions
+## 10. API Setup Instructions
 
 * **Google Gemini API Key**: Get a key from the [Google AI Studio](https://aistudio.google.com/). Set `GEMINI_API_KEY` in `backend/.env`.
 * **Google Maps API Key**: Set up a project in [Google Cloud Console](https://console.cloud.google.com/), enable the *Maps JavaScript API*, *Directions API*, and *Places API*, and generate an API key. Set `GOOGLE_MAPS_API_KEY` in `backend/.env`.
@@ -135,7 +171,7 @@ Current verified status:
 
 ---
 
-## 10. Security & Privacy
+## 11. Security & Privacy
 1. **User Location Control**: User coordinates are only analyzed locally in the browser or sent to Maps APIs with explicit user permission. A location consent settings card is provided.
 2. **Hardened API Defaults**: CORS is restricted through `CORS_ALLOWED_ORIGINS`, HTTP security headers are applied, and string inputs are validated against basic script injection patterns.
 3. **Encrypted Operations**: Firestore database access rules block unauthorized readers. In Demo Mode, information is kept locally in `backend/local_db.json`.
@@ -143,7 +179,7 @@ Current verified status:
 
 ---
 
-## 11. Future Improvements
+## 12. Future Improvements
 * **Automated Smart Meter Integration**: Connect smart meters (e.g. Sense) to automate electricity logging.
 * **Wearable Health Sync**: Read steps directly from Google Fit or Apple Health to automatically log walking offsets.
 * **Collaborative Challenges**: Enable users to form clubs and participate in team vs team sustainability brackets.
