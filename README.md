@@ -1,8 +1,5 @@
 # EcoAI Guardian - AI-Powered Carbon Reduction Assistant
 
-🚀 **Live Deployment**: [https://ecoai
-...................................................................................-guardian-499914.uc.r.appspot.com](https://ecoai-guardian-499914.uc.r.appspot.com)
-
 **EcoAI Guardian** is a production-ready, full-stack climate action application designed to help individuals understand, track, and reduce their personal carbon footprint. It behaves like a personal environmental coach by leveraging user habits, location intelligence, machine learning forecasting, and Google Cloud Services.
 
 ---
